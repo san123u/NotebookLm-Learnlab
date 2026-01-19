@@ -4,6 +4,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useAuthLayout } from '../../components/layout/AuthLayout';
 import { Check, X } from 'lucide-react';
 import { validatePassword } from '../../lib/validation';
+import { Input } from '../../components/ui/Input';
+import { Button } from '../../components/ui/Button';
 
 export function SignupPage() {
   const [email, setEmail] = useState('');
@@ -57,81 +59,62 @@ export function SignupPage() {
     <form onSubmit={handleSubmit} className="px-10 py-10">
       {/* Logo */}
       <div className="flex justify-center items-center gap-3 mb-6">
-        <img
-          src="/ihc-logo.png"
-          alt="IHC"
-          className="h-10 w-auto"
-        />
-        <div className="w-px h-8 bg-gray-300" />
-        <span className="text-lg font-bold text-gray-800 tracking-wider">XAILON</span>
+        <div className="w-10 h-10 bg-[var(--btn-primary-bg)] rounded-lg flex items-center justify-center">
+          <span className="text-white font-bold text-lg">A</span>
+        </div>
+        <span className="text-lg font-bold text-gray-800">App</span>
       </div>
 
       <h1 className="text-2xl font-semibold text-gray-900 text-center mb-2">
         Create account
       </h1>
       <p className="text-sm text-gray-500 text-center mb-8">
-        to get started with IHC XAILON
+        to get started
       </p>
 
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <input
-              type="text"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded focus:border-[#0067B8] focus:outline-none focus:ring-1 focus:ring-[#0067B8] transition-colors"
-              placeholder="First name"
-            />
-          </div>
-          <div>
-            <input
-              type="text"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded focus:border-[#0067B8] focus:outline-none focus:ring-1 focus:ring-[#0067B8] transition-colors"
-              placeholder="Last name"
-            />
-          </div>
+          <Input
+            type="text"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            placeholder="First name"
+          />
+          <Input
+            type="text"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            placeholder="Last name"
+          />
         </div>
 
         <div>
-          <input
+          <Input
             type="email"
             value={email}
             onChange={(e) => {
               setEmail(e.target.value);
               setEmailError('');
             }}
-            className={`w-full px-4 py-3 border rounded focus:outline-none focus:ring-1 transition-colors ${emailError
-                ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-                : 'border-gray-300 focus:border-[#0067B8] focus:ring-[#0067B8]'
-              }`}
             placeholder="Email address"
             required
             autoComplete="email"
+            error={emailError || undefined}
           />
-          {emailError && (
-            <p className="mt-2 text-sm text-red-600">
-              {emailError}
-              {emailError.includes("already registered") && (
-                <>
-                  {' '}
-                  <Link to="/auth/forgot-password" className="text-[#0067B8] hover:underline">
-                    Forgot your password?
-                  </Link>
-                </>
-              )}
+          {emailError && emailError.includes("already registered") && (
+            <p className="mt-1 text-sm text-gray-600">
+              <Link to="/auth/forgot-password" className="text-[var(--btn-primary-bg)] hover:underline">
+                Forgot your password?
+              </Link>
             </p>
           )}
         </div>
 
         <div>
-          <input
+          <Input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded focus:border-[#0067B8] focus:outline-none focus:ring-1 focus:ring-[#0067B8] transition-colors"
             placeholder="Create password"
             required
             autoComplete="new-password"
@@ -151,26 +134,22 @@ export function SignupPage() {
           )}
         </div>
 
-        <button
+        <Button
           type="submit"
-          disabled={isLoading || !passwordValidation.isValid}
-          className="w-full py-3 px-4 bg-[#0067B8] hover:bg-[#005A9E] text-white font-semibold rounded transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          variant="primary"
+          size="lg"
+          loading={isLoading}
+          disabled={!passwordValidation.isValid}
+          className="w-full"
         >
-          {isLoading ? (
-            <>
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Creating account...
-            </>
-          ) : (
-            'Create account'
-          )}
-        </button>
+          Create account
+        </Button>
 
         <div className="text-center">
           <span className="text-sm text-gray-500">Already have an account? </span>
           <Link
             to="/auth/login"
-            className="text-sm text-[#0067B8] hover:underline"
+            className="text-sm text-[var(--btn-primary-bg)] hover:underline"
           >
             Sign in
           </Link>

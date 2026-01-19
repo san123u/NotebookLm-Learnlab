@@ -16,3 +16,25 @@ Rules:
 - Do NOT create new databases.
 - Follow existing naming conventions.
 - If unsure, ask before changing structure.
+
+Design System Rules:
+- Always use design system components from frontend/src/components/ui/.
+- Never write raw HTML <input> or <button> elements outside ui components.
+- Use the Button component for all buttons.
+- Use the Input component for all text inputs.
+- Use the Card component for content containers.
+- Landing pages must use design-system components.
+- Tailwind tokens come from design-system/design-tokens.css.
+- Never define colors inline. Use CSS variables like var(--btn-primary-bg).
+
+App Personalization:
+- app.config.json is the source of truth for app name, description, theme color, and slug.
+- Docker service names must reference values in app.config.json (e.g., <slug>-backend).
+- The frontend reads app config from /app.config.json (served from public/).
+- Use the useAppConfig() hook to access app configuration in React components.
+
+File Locations:
+- Design tokens: frontend/src/design-system/design-tokens.css
+- Design docs: frontend/src/design-system/design-system.md
+- UI components: frontend/src/components/ui/
+- App config: app.config.json and frontend/public/app.config.json

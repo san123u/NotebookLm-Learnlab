@@ -6,6 +6,8 @@ import { useCountdown } from '../../hooks/useCountdown';
 import { Check, X, ArrowLeft } from 'lucide-react';
 import { validatePassword } from '../../lib/validation';
 import { OtpInput } from '../../components/ui/OtpInput';
+import { Input } from '../../components/ui/Input';
+import { Button } from '../../components/ui/Button';
 
 export function ResetPasswordPage() {
   const [otp, setOtp] = useState('');
@@ -16,7 +18,7 @@ export function ResetPasswordPage() {
 
   const { resetPassword, forgotPassword } = useAuth();
   const { setError, setSuccess, clearMessages } = useAuthLayout();
-  const { isActive: isResendDisabled, formattedTime, start: startCooldown } = useCountdown(120, true); // Start with cooldown since OTP was just sent
+  const { isActive: isResendDisabled, formattedTime, start: startCooldown } = useCountdown(120, true);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -91,13 +93,10 @@ export function ResetPasswordPage() {
 
       {/* Logo */}
       <div className="flex justify-center items-center gap-3 mb-6">
-        <img
-          src="/ihc-logo.png"
-          alt="IHC"
-          className="h-10 w-auto"
-        />
-        <div className="w-px h-8 bg-gray-300" />
-        <span className="text-lg font-bold text-gray-800 tracking-wider">XAILON</span>
+        <div className="w-10 h-10 bg-[var(--btn-primary-bg)] rounded-lg flex items-center justify-center">
+          <span className="text-white font-bold text-lg">A</span>
+        </div>
+        <span className="text-lg font-bold text-gray-800">App</span>
       </div>
 
       {/* Email badge */}
@@ -127,11 +126,10 @@ export function ResetPasswordPage() {
         </div>
 
         <div>
-          <input
+          <Input
             type="password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded focus:border-[#0067B8] focus:outline-none focus:ring-1 focus:ring-[#0067B8] transition-colors"
             placeholder="New password"
             required
             autoComplete="new-password"
@@ -151,20 +149,16 @@ export function ResetPasswordPage() {
           )}
         </div>
 
-        <button
+        <Button
           type="submit"
-          disabled={isLoading || otp.length !== 6 || !passwordValidation.isValid}
-          className="w-full py-3 px-4 bg-[#0067B8] hover:bg-[#005A9E] text-white font-semibold rounded transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          variant="primary"
+          size="lg"
+          loading={isLoading}
+          disabled={otp.length !== 6 || !passwordValidation.isValid}
+          className="w-full"
         >
-          {isLoading ? (
-            <>
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Resetting...
-            </>
-          ) : (
-            'Reset password'
-          )}
-        </button>
+          Reset password
+        </Button>
 
         <div className="text-center space-y-2">
           <button
@@ -178,7 +172,7 @@ export function ResetPasswordPage() {
           <div>
             <Link
               to="/auth/login"
-              className="text-sm text-[#0067B8] hover:underline"
+              className="text-sm text-[var(--btn-primary-bg)] hover:underline"
             >
               Back to sign in
             </Link>

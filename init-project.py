@@ -3,20 +3,53 @@
 Project Initialization Script
 
 This script initializes a new project from the core platform template.
-It renames the project, updates configuration files, and prepares
-the environment for development.
+It collects app information via interactive prompts, updates configuration
+files, and prepares the environment for development.
 
 Usage:
-    python init-project.py --name "My App" --slug my-app
+    ./init-project.py          # Interactive mode
+    python init-project.py     # Interactive mode
 """
 
-import argparse
+import json
 import os
 import re
 import secrets
-import shutil
 import sys
 from pathlib import Path
+
+
+# ANSI colors for terminal output
+class Colors:
+    HEADER = '\033[95m'
+    BLUE = '\033[94m'
+    CYAN = '\033[96m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    RED = '\033[91m'
+    BOLD = '\033[1m'
+    DIM = '\033[2m'
+    RESET = '\033[0m'
+
+
+def print_header(text: str) -> None:
+    """Print a styled header."""
+    print(f"\n{Colors.BOLD}{Colors.CYAN}{text}{Colors.RESET}")
+
+
+def print_step(text: str) -> None:
+    """Print a step message."""
+    print(f"  {Colors.GREEN}>{Colors.RESET} {text}")
+
+
+def print_warning(text: str) -> None:
+    """Print a warning message."""
+    print(f"  {Colors.YELLOW}!{Colors.RESET} {text}")
+
+
+def print_error(text: str) -> None:
+    """Print an error message."""
+    print(f"  {Colors.RED}x{Colors.RESET} {text}")
 
 
 def generate_secret_key(length: int = 32) -> str:
@@ -24,11 +57,160 @@ def generate_secret_key(length: int = 32) -> str:
     return secrets.token_hex(length)
 
 
-def snake_case(text: str) -> str:
-    """Convert text to snake_case."""
+def slugify(text: str) -> str:
+    """Convert text to a URL/Docker-friendly slug."""
+    text = text.lower().strip()
     text = re.sub(r'[^\w\s-]', '', text)
-    text = re.sub(r'[-\s]+', '_', text)
-    return text.lower()
+    text = re.sub(r'[-\s]+', '-', text)
+    return text
+
+
+def validate_slug(slug: str) -> bool:
+    """Validate that a slug is properly formatted."""
+    return bool(re.match(r'^[a-z][a-z0-9-]*$', slug))
+
+
+def prompt_input(prompt: str, default: str = None, validator=None) -> str:
+    """Get input from user with optional default and validation."""
+    if default:
+        display_prompt = f"{Colors.BOLD}{prompt}{Colors.RESET} [{Colors.DIM}{default}{Colors.RESET}]: "
+    else:
+        display_prompt = f"{Colors.BOLD}{prompt}{Colors.RESET}: "
+
+    while True:
+        value = input(display_prompt).strip()
+        if not value and default:
+            value = default
+
+        if not value:
+            print_error("This field is required")
+            continue
+
+        if validator and not validator(value):
+            continue
+
+        return value
+
+
+def prompt_choice(prompt: str, options: list[tuple[str, str]], default: int = 1) -> str:
+    """Display a numbered choice menu and return the selected value."""
+    print(f"\n{Colors.BOLD}{prompt}{Colors.RESET}")
+    for i, (value, label) in enumerate(options, 1):
+        marker = f"{Colors.CYAN}>{Colors.RESET}" if i == default else " "
+        print(f"  {marker} {i}. {label}")
+
+    while True:
+        try:
+            choice = input(f"\n  Enter choice [{default}]: ").strip()
+            if not choice:
+                choice = default
+            else:
+                choice = int(choice)
+
+            if 1 <= choice <= len(options):
+                return options[choice - 1][0]
+            print_error(f"Please enter a number between 1 and {len(options)}")
+        except ValueError:
+            print_error("Please enter a valid number")
+
+
+def prompt_color(prompt: str, default: str = "blue") -> str:
+    """Prompt for a color with validation."""
+    valid_colors = [
+        'slate', 'gray', 'zinc', 'neutral', 'stone',
+        'red', 'orange', 'amber', 'yellow', 'lime',
+        'green', 'emerald', 'teal', 'cyan', 'sky',
+        'blue', 'indigo', 'violet', 'purple', 'fuchsia',
+        'pink', 'rose'
+    ]
+
+    print(f"\n{Colors.BOLD}{prompt}{Colors.RESET}")
+    print(f"  {Colors.DIM}Available: {', '.join(valid_colors)}{Colors.RESET}")
+    print(f"  {Colors.DIM}Or enter a hex color (e.g., #3b82f6){Colors.RESET}")
+
+    while True:
+        value = input(f"  Color [{default}]: ").strip().lower()
+        if not value:
+            value = default
+
+        # Check if it's a valid Tailwind color name
+        if value in valid_colors:
+            return value
+
+        # Check if it's a valid hex color
+        if re.match(r'^#[0-9a-f]{6}$', value, re.IGNORECASE):
+            return value
+
+        print_error(f"Invalid color. Use a Tailwind color name or hex code (e.g., #3b82f6)")
+
+
+def collect_app_info() -> dict:
+    """Collect app information via interactive prompts."""
+    print(f"""
+{Colors.BOLD}{Colors.CYAN}
+   _____ ____  ____  ______   ____  __    ___  ______ ______ ____  ____   ____  ___
+  / ___// __ \\/ __ \\/ ____/  / __ \\/ /   /   |/_  __// ____// __ \\/ __ \\ / __ \\/   |
+  \\__ \\/ / / / /_/ / __/    / /_/ / /   / /| | / /  / /_   / / / / /_/ // /_/ / /| |
+ ___/ / /_/ / _, _/ /___   / ____/ /___/ ___ |/ /  / __/  / /_/ / _, _// _, _/ ___ |
+/____/\\____/_/ |_/_____/  /_/   /_____/_/  |_/_/  /_/     \\____/_/ |_|/_/ |_/_/  |_|
+{Colors.RESET}
+{Colors.DIM}Create your personalized app from the Core Platform Template{Colors.RESET}
+""")
+
+    print_header("App Information")
+
+    # App Name
+    app_name = prompt_input(
+        "App Name (e.g., 'My Awesome App')"
+    )
+
+    # App Slug
+    suggested_slug = slugify(app_name)
+
+    def validate_slug_input(value):
+        if not validate_slug(value):
+            print_error("Slug must start with a letter and contain only lowercase letters, numbers, and hyphens")
+            return False
+        return True
+
+    app_slug = prompt_input(
+        "App Slug (URL-friendly, lowercase)",
+        default=suggested_slug,
+        validator=validate_slug_input
+    )
+
+    # Primary Color
+    primary_color = prompt_color(
+        "Primary Color (Tailwind name or hex)",
+        default="indigo"
+    )
+
+    # App Description
+    app_description = prompt_input(
+        "App Description (one sentence)",
+        default=f"{app_name} - Built with Core Platform"
+    )
+
+    # App Type
+    app_type = prompt_choice(
+        "What type of app is this?",
+        [
+            ("saas-dashboard", "SaaS Dashboard"),
+            ("marketplace", "Marketplace"),
+            ("internal-tool", "Internal Tool"),
+            ("ai-chat-app", "AI Chat App"),
+            ("other", "Other"),
+        ],
+        default=1
+    )
+
+    return {
+        "app_name": app_name,
+        "app_slug": app_slug,
+        "primary_color": primary_color,
+        "app_description": app_description,
+        "app_type": app_type,
+    }
 
 
 def replace_in_file(file_path: Path, replacements: dict[str, str]) -> bool:
@@ -43,50 +225,83 @@ def replace_in_file(file_path: Path, replacements: dict[str, str]) -> bool:
             return True
         return False
     except Exception as e:
-        print(f"  Warning: Could not process {file_path}: {e}")
+        print_warning(f"Could not process {file_path}: {e}")
         return False
 
 
-def create_env_file(project_root: Path, app_name: str, slug: str) -> None:
+def create_app_config(project_root: Path, config: dict) -> None:
+    """Create app.config.json with collected information."""
+    config_file = project_root / "app.config.json"
+
+    full_config = {
+        "app": {
+            "name": config["app_name"],
+            "slug": config["app_slug"],
+            "description": config["app_description"],
+            "type": config["app_type"],
+        },
+        "theme": {
+            "primaryColor": config["primary_color"],
+        },
+        "created_at": __import__('datetime').datetime.now().isoformat(),
+    }
+
+    config_json = json.dumps(full_config, indent=2)
+
+    # Write to project root
+    config_file.write_text(config_json)
+    print_step(f"Created app.config.json")
+
+    # Also copy to frontend/public for frontend access
+    public_config = project_root / "frontend" / "public" / "app.config.json"
+    public_config.write_text(config_json)
+    print_step(f"Created frontend/public/app.config.json")
+
+
+def create_env_file(project_root: Path, config: dict) -> None:
     """Create .env file from .env.example with generated values."""
     env_example = project_root / ".env.example"
     env_file = project_root / ".env"
 
     if env_file.exists():
-        print("  .env file already exists, skipping...")
+        print_warning(".env file already exists, skipping...")
         return
 
     if not env_example.exists():
-        print("  Warning: .env.example not found")
+        print_warning(".env.example not found")
         return
 
     content = env_example.read_text()
+    slug = config["app_slug"]
 
     # Generate secure values
     jwt_secret = generate_secret_key(32)
     mongo_password = generate_secret_key(16)
 
     replacements = {
-        'APP_NAME="Core Platform"': f'APP_NAME="{app_name}"',
+        'APP_NAME="Core Platform"': f'APP_NAME="{config["app_name"]}"',
         'JWT_SECRET=your-32-character-secret-key-here': f'JWT_SECRET={jwt_secret}',
         'MONGO_PASSWORD=app_secure_pass': f'MONGO_PASSWORD={mongo_password}',
-        'app_secure_pass@app-mongo': f'{mongo_password}@app-mongo',
+        f'app_secure_pass@app-mongo': f'{mongo_password}@{slug}-mongo',
         'app_secure_pass@localhost': f'{mongo_password}@localhost',
+        '@app-mongo:': f'@{slug}-mongo:',
+        'redis://app-redis': f'redis://{slug}-redis',
     }
 
     for old, new in replacements.items():
         content = content.replace(old, new)
 
     env_file.write_text(content)
-    print(f"  Created .env with generated secrets")
+    print_step(f"Created .env with generated secrets")
 
 
-def update_docker_compose(project_root: Path, slug: str) -> None:
+def update_docker_compose(project_root: Path, config: dict) -> None:
     """Update docker-compose.yml with project-specific names."""
     docker_compose = project_root / "docker-compose.yml"
+    slug = config["app_slug"]
 
     if not docker_compose.exists():
-        print("  Warning: docker-compose.yml not found")
+        print_warning("docker-compose.yml not found")
         return
 
     replacements = {
@@ -99,15 +314,16 @@ def update_docker_compose(project_root: Path, slug: str) -> None:
     }
 
     if replace_in_file(docker_compose, replacements):
-        print(f"  Updated docker-compose.yml with {slug}-* service names")
+        print_step(f"Updated docker-compose.yml with {slug}-* service names")
 
 
-def update_nginx_config(project_root: Path, slug: str) -> None:
+def update_nginx_config(project_root: Path, config: dict) -> None:
     """Update nginx.conf with project-specific backend name."""
     nginx_conf = project_root / "frontend" / "nginx.conf"
+    slug = config["app_slug"]
 
     if not nginx_conf.exists():
-        print("  Warning: frontend/nginx.conf not found")
+        print_warning("frontend/nginx.conf not found")
         return
 
     replacements = {
@@ -115,24 +331,66 @@ def update_nginx_config(project_root: Path, slug: str) -> None:
     }
 
     if replace_in_file(nginx_conf, replacements):
-        print(f"  Updated nginx.conf with {slug}-backend")
+        print_step(f"Updated nginx.conf with {slug}-backend")
 
 
-def update_readme(project_root: Path, app_name: str, slug: str) -> None:
+def update_frontend_index(project_root: Path, config: dict) -> None:
+    """Update frontend/index.html with app title."""
+    index_html = project_root / "frontend" / "index.html"
+
+    if not index_html.exists():
+        print_warning("frontend/index.html not found")
+        return
+
+    replacements = {
+        "<title>Core Platform</title>": f"<title>{config['app_name']}</title>",
+    }
+
+    if replace_in_file(index_html, replacements):
+        print_step(f"Updated frontend/index.html with app title")
+
+
+def update_design_tokens(project_root: Path, config: dict) -> None:
+    """Update design tokens with the chosen primary color."""
+    tokens_file = project_root / "frontend" / "src" / "design-system" / "design-tokens.css"
+
+    if not tokens_file.exists():
+        print_warning("design-tokens.css not found")
+        return
+
+    primary_color = config["primary_color"]
+
+    # If it's a Tailwind color name, we map to CSS custom properties
+    # If it's a hex color, we use it directly
+    if primary_color.startswith("#"):
+        # For hex colors, we set --color-app-primary directly
+        content = tokens_file.read_text()
+        content = content.replace("--color-app-primary: var(--color-indigo-600);", f"--color-app-primary: {primary_color};")
+        tokens_file.write_text(content)
+    else:
+        # For Tailwind color names, update the reference
+        content = tokens_file.read_text()
+        content = content.replace("var(--color-indigo-", f"var(--color-{primary_color}-")
+        tokens_file.write_text(content)
+
+    print_step(f"Updated design tokens with {primary_color} color")
+
+
+def update_readme(project_root: Path, config: dict) -> None:
     """Update README.md with project name."""
     readme = project_root / "README.md"
 
     if not readme.exists():
-        print("  Warning: README.md not found")
+        print_warning("README.md not found")
         return
 
     replacements = {
-        "Core Platform Template": app_name,
-        "core-platform": slug,
+        "# Core Platform Template": f"# {config['app_name']}",
+        "core-platform": config["app_slug"],
     }
 
     if replace_in_file(readme, replacements):
-        print(f"  Updated README.md with project name")
+        print_step(f"Updated README.md with project name")
 
 
 def cleanup_template_files(project_root: Path) -> None:
@@ -145,64 +403,83 @@ def cleanup_template_files(project_root: Path) -> None:
         file_path = project_root / file_name
         if file_path.exists():
             file_path.unlink()
-            print(f"  Removed {file_name}")
+            print_step(f"Removed {file_name}")
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Initialize a new project from the core platform template"
-    )
-    parser.add_argument(
-        "--name",
-        required=True,
-        help="Human-readable project name (e.g., 'My Awesome App')"
-    )
-    parser.add_argument(
-        "--slug",
-        required=True,
-        help="URL/Docker-friendly slug (e.g., 'my-awesome-app')"
-    )
-    parser.add_argument(
-        "--no-cleanup",
-        action="store_true",
-        help="Don't remove template files after initialization"
-    )
-
-    args = parser.parse_args()
-
-    # Validate slug format
-    if not re.match(r'^[a-z][a-z0-9-]*$', args.slug):
-        print("Error: Slug must start with a letter and contain only lowercase letters, numbers, and hyphens")
-        sys.exit(1)
-
     project_root = Path(__file__).parent.resolve()
 
-    print(f"\n🚀 Initializing project: {args.name}")
-    print(f"   Slug: {args.slug}")
-    print(f"   Root: {project_root}\n")
+    # Check if already initialized
+    config_file = project_root / "app.config.json"
+    if config_file.exists():
+        print_warning("Project already initialized (app.config.json exists)")
+        response = input("Do you want to re-initialize? This will overwrite existing config [y/N]: ").strip().lower()
+        if response != 'y':
+            print("Aborted.")
+            sys.exit(0)
 
-    print("📝 Creating configuration files...")
-    create_env_file(project_root, args.name, args.slug)
+    # Collect app information
+    config = collect_app_info()
 
-    print("\n🐳 Updating Docker configuration...")
-    update_docker_compose(project_root, args.slug)
-    update_nginx_config(project_root, args.slug)
+    # Confirm
+    print_header("Configuration Summary")
+    print(f"  App Name:     {Colors.CYAN}{config['app_name']}{Colors.RESET}")
+    print(f"  Slug:         {Colors.CYAN}{config['app_slug']}{Colors.RESET}")
+    print(f"  Color:        {Colors.CYAN}{config['primary_color']}{Colors.RESET}")
+    print(f"  Description:  {Colors.CYAN}{config['app_description']}{Colors.RESET}")
+    print(f"  Type:         {Colors.CYAN}{config['app_type']}{Colors.RESET}")
 
-    print("\n📖 Updating documentation...")
-    update_readme(project_root, args.name, args.slug)
+    confirm = input(f"\n{Colors.BOLD}Proceed with initialization?{Colors.RESET} [Y/n]: ").strip().lower()
+    if confirm == 'n':
+        print("Aborted.")
+        sys.exit(0)
 
-    if not args.no_cleanup:
-        print("\n🧹 Cleaning up template files...")
-        cleanup_template_files(project_root)
+    # Initialize
+    print_header("Initializing Project")
 
-    print("\n✅ Project initialized successfully!")
-    print("\n📋 Next steps:")
-    print(f"   1. Review and edit .env file with your settings")
-    print(f"   2. Run: docker compose up --build")
-    print(f"   3. Access the app at http://localhost:3700")
-    print(f"   4. Login with the admin credentials from .env")
-    print()
+    print("\n  Creating configuration files...")
+    create_app_config(project_root, config)
+    create_env_file(project_root, config)
+
+    print("\n  Updating Docker configuration...")
+    update_docker_compose(project_root, config)
+    update_nginx_config(project_root, config)
+
+    print("\n  Updating frontend...")
+    update_frontend_index(project_root, config)
+    update_design_tokens(project_root, config)
+
+    print("\n  Updating documentation...")
+    update_readme(project_root, config)
+
+    # Print success message
+    print(f"""
+{Colors.GREEN}{Colors.BOLD}
+Project initialized successfully!
+{Colors.RESET}
+
+{Colors.BOLD}Next steps:{Colors.RESET}
+
+  1. Review the generated .env file:
+     {Colors.CYAN}cat .env{Colors.RESET}
+
+  2. Start the development servers:
+     {Colors.CYAN}docker compose up --build{Colors.RESET}
+
+  3. Access your app:
+     {Colors.CYAN}http://localhost:3700{Colors.RESET}
+
+  4. Login with admin credentials from .env:
+     - Email: ADMIN_EMAIL
+     - Password: ADMIN_PASSWORD
+
+{Colors.DIM}Configuration saved to app.config.json{Colors.RESET}
+""")
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\n\nAborted.")
+        sys.exit(1)

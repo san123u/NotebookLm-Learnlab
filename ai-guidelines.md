@@ -108,3 +108,56 @@ Required variables in `.env`:
 - `ADMIN_PASSWORD` - Initial admin user password
 
 See `.env.example` for all available options.
+
+## Design System Rules
+
+### Component Usage
+- All interactive UI elements must come from `components/ui/`
+- Use `Button` component for all buttons - never raw `<button>`
+- Use `Input` component for all text inputs - never raw `<input>`
+- Use `Card` component for content containers
+- Tailwind tokens come from `design-system/design-tokens.css`
+- Never define colors inline - use CSS variables like `var(--btn-primary-bg)`
+
+### Design Tokens
+The design system uses CSS custom properties defined in `frontend/src/design-system/design-tokens.css`:
+
+- `--btn-primary-bg` - Primary button background
+- `--btn-primary-hover` - Primary button hover state
+- `--color-app-primary-*` - Primary color scale (50-900)
+- `--color-app-success/warning/danger` - Semantic colors
+
+### File Locations
+- Design tokens: `frontend/src/design-system/design-tokens.css`
+- Design documentation: `frontend/src/design-system/design-system.md`
+- UI components: `frontend/src/components/ui/`
+
+## App Personalization
+
+### Configuration Files
+- `app.config.json` is the source of truth for:
+  - App name
+  - App slug (used in Docker service names)
+  - App description
+  - Theme color
+  - App type (saas-dashboard, marketplace, etc.)
+
+### Accessing Configuration
+- Backend: Read `app.config.json` from project root
+- Frontend: Use `useAppConfig()` hook from `hooks/useAppConfig.ts`
+- The config is served from `/app.config.json` (in `public/`)
+
+### Docker Service Names
+After running `init-project.py`, Docker services are named:
+- `<slug>-backend`
+- `<slug>-frontend`
+- `<slug>-mongo`
+- `<slug>-redis`
+
+### Initialization
+Run `./init-project.py` to:
+1. Set app name, slug, and description
+2. Choose primary color
+3. Generate `.env` with secure secrets
+4. Update Docker service names
+5. Create `app.config.json`

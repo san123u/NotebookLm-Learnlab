@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useAuthLayout } from '../../components/layout/AuthLayout';
 import { ArrowLeft } from 'lucide-react';
+import { Input } from '../../components/ui/Input';
+import { Button } from '../../components/ui/Button';
 
 export function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -46,13 +48,10 @@ export function ForgotPasswordPage() {
 
       {/* Logo */}
       <div className="flex justify-center items-center gap-3 mb-6">
-        <img
-          src="/ihc-logo.png"
-          alt="IHC"
-          className="h-10 w-auto"
-        />
-        <div className="w-px h-8 bg-gray-300" />
-        <span className="text-lg font-bold text-gray-800 tracking-wider">XAILON</span>
+        <div className="w-10 h-10 bg-[var(--btn-primary-bg)] rounded-lg flex items-center justify-center">
+          <span className="text-white font-bold text-lg">A</span>
+        </div>
+        <span className="text-lg font-bold text-gray-800">App</span>
       </div>
 
       <h1 className="text-2xl font-semibold text-gray-900 text-center mb-2">
@@ -63,48 +62,34 @@ export function ForgotPasswordPage() {
       </p>
 
       <div className="space-y-6">
-        <div>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              setEmailError('');
-            }}
-            className={`w-full px-4 py-3 border rounded focus:outline-none focus:ring-1 transition-colors ${
-              emailError
-                ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-                : 'border-gray-300 focus:border-[#0067B8] focus:ring-[#0067B8]'
-            }`}
-            placeholder="Email address"
-            required
-            autoComplete="email"
-            autoFocus
-          />
-          {emailError && (
-            <p className="mt-2 text-sm text-red-600">{emailError}</p>
-          )}
-        </div>
+        <Input
+          type="email"
+          value={email}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            setEmailError('');
+          }}
+          placeholder="Email address"
+          required
+          autoComplete="email"
+          autoFocus
+          error={emailError || undefined}
+        />
 
-        <button
+        <Button
           type="submit"
-          disabled={isLoading}
-          className="w-full py-3 px-4 bg-[#0067B8] hover:bg-[#005A9E] text-white font-semibold rounded transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          variant="primary"
+          size="lg"
+          loading={isLoading}
+          className="w-full"
         >
-          {isLoading ? (
-            <>
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Sending...
-            </>
-          ) : (
-            'Send reset code'
-          )}
-        </button>
+          Send reset code
+        </Button>
 
         <div className="text-center">
           <Link
             to="/auth/login"
-            className="text-sm text-[#0067B8] hover:underline"
+            className="text-sm text-[var(--btn-primary-bg)] hover:underline"
           >
             Back to sign in
           </Link>

@@ -18,18 +18,35 @@ A production-ready fullstack platform template with authentication, user managem
 - Account settings (profile management)
 - Responsive UI with dark mode support
 
+## Creating a new app
+
+```bash
+./init-project.py
+docker compose up --build
+```
+
+The initialization script will interactively ask you:
+- **App Name** - Display name for your app
+- **App Slug** - URL/Docker-friendly identifier (e.g., `my-app`)
+- **Primary Color** - Tailwind color name or hex code
+- **App Description** - One-line description
+- **App Type** - SaaS Dashboard, Marketplace, Internal Tool, AI Chat App, or Other
+
+After initialization:
+- `app.config.json` contains your app configuration
+- Docker services are renamed to `<slug>-backend`, `<slug>-frontend`, etc.
+- Design tokens use your chosen primary color
+- Landing page displays your app name and description
+
 ## Quick Start
 
 ### 1. Initialize the Project
 
 ```bash
-python init-project.py --name "My App" --slug my-app
+./init-project.py
 ```
 
-This will:
-- Create a `.env` file with generated secrets
-- Update Docker service names to use your slug
-- Configure the project with your app name
+Follow the interactive prompts to configure your app.
 
 ### 2. Start the Services
 
@@ -148,6 +165,25 @@ Copy `.env.example` to `.env` and configure:
 3. Update `Sidebar.tsx` navigation
 
 See `ai-guidelines.md` for detailed development guidelines.
+
+## Design System
+
+The project includes a design system for UI consistency:
+
+### UI Components (`frontend/src/components/ui/`)
+- `Button` - Primary, secondary, outline, and ghost variants
+- `Input` - Text inputs with label, error, and helper text support
+- `Card` - Content containers with optional headers
+- `OtpInput` - OTP/verification code input
+
+### Design Tokens (`frontend/src/design-system/`)
+- `design-tokens.css` - CSS custom properties for colors, spacing, etc.
+- `design-system.md` - Component usage documentation
+
+### Usage Rules
+- Always use `Button` and `Input` components instead of raw HTML elements
+- Use CSS variables like `var(--btn-primary-bg)` for colors
+- Refer to `design-system.md` for component examples
 
 ## User Roles
 

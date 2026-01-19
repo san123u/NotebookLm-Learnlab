@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useAuthLayout } from '../../components/layout/AuthLayout';
+import { Input } from '../../components/ui/Input';
+import { Button } from '../../components/ui/Button';
 
 // Email validation regex
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -54,7 +56,7 @@ export function LoginPage() {
     <form onSubmit={handleSubmit} className="px-10 py-10">
       {/* Logo */}
       <div className="flex justify-center items-center gap-3 mb-6">
-        <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
+        <div className="w-10 h-10 bg-[var(--btn-primary-bg)] rounded-lg flex items-center justify-center">
           <span className="text-white font-bold text-lg">A</span>
         </div>
         <span className="text-lg font-bold text-gray-800">App</span>
@@ -69,7 +71,7 @@ export function LoginPage() {
         <p className="text-sm text-red-600 text-center mb-4">
           {emailError}
           {' '}
-          <Link to="/auth/signup" className="text-indigo-600 hover:underline">
+          <Link to="/auth/signup" className="text-[var(--btn-primary-bg)] hover:underline">
             Create an account
           </Link>
         </p>
@@ -80,67 +82,53 @@ export function LoginPage() {
       )}
 
       <div className="space-y-4">
-        <div>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              setEmailError('');
-            }}
-            className={`w-full px-4 py-3 border rounded focus:outline-none focus:ring-1 transition-colors ${
-              emailError
-                ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-                : 'border-gray-300 focus:border-indigo-600 focus:ring-indigo-600'
-            }`}
-            placeholder="Email address"
-            required
-            autoComplete="email"
-            autoFocus
-          />
-        </div>
+        <Input
+          type="email"
+          value={email}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            setEmailError('');
+          }}
+          placeholder="Email address"
+          required
+          autoComplete="email"
+          autoFocus
+          error={emailError ? ' ' : undefined}
+        />
 
-        <div>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded focus:border-indigo-600 focus:outline-none focus:ring-1 focus:ring-indigo-600 transition-colors"
-            placeholder="Password"
-            required
-            autoComplete="current-password"
-          />
-        </div>
+        <Input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password"
+          required
+          autoComplete="current-password"
+        />
 
         <div className="text-left">
           <Link
             to="/auth/forgot-password"
-            className="text-sm text-indigo-600 hover:underline"
+            className="text-sm text-[var(--btn-primary-bg)] hover:underline"
           >
             Forgot your password?
           </Link>
         </div>
 
-        <button
+        <Button
           type="submit"
-          disabled={isLoading}
-          className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          variant="primary"
+          size="lg"
+          loading={isLoading}
+          className="w-full"
         >
-          {isLoading ? (
-            <>
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Signing in...
-            </>
-          ) : (
-            'Sign in'
-          )}
-        </button>
+          Sign in
+        </Button>
 
         <div className="text-center">
           <span className="text-sm text-gray-500">No account? </span>
           <Link
             to="/auth/signup"
-            className="text-sm text-indigo-600 hover:underline"
+            className="text-sm text-[var(--btn-primary-bg)] hover:underline"
           >
             Create one
           </Link>
