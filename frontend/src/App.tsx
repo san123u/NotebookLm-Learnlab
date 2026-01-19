@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, ProtectedRoute, PublicRoute } from './core';
 import { ThemeProvider } from './contexts/ThemeContext';
-import { Layout } from './components/layout/Layout';
+import { AppShell } from './components/layout/AppShell';
 import { AuthLayout } from './components/layout/AuthLayout';
 import { AdminLayout } from './components/layout/AdminLayout';
 import { RoleGuard } from './components/auth/RoleGuard';
@@ -61,11 +61,11 @@ function AppRoutes() {
         <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
       </Route>
 
-      {/* Protected dashboard routes with Layout wrapper */}
+      {/* Protected dashboard routes with AppShell wrapper */}
       <Route
         element={
           <ProtectedRoute>
-            <Layout />
+            <AppShell />
           </ProtectedRoute>
         }
       >

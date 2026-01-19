@@ -116,14 +116,16 @@ export function VerifyOtpPage() {
         </Button>
 
         <div className="text-center space-y-2">
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
             onClick={handleResendOtp}
             disabled={isResending || isResendDisabled}
-            className="text-sm text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="text-sm text-gray-500 hover:text-gray-700"
           >
             {isResending ? 'Sending...' : isResendDisabled ? `Resend code (${formattedTime})` : 'Resend code'}
-          </button>
+          </Button>
           <div>
             <Link
               to="/auth/login"

@@ -28,13 +28,30 @@ Design System Rules:
 - Never define colors inline. Use CSS variables like var(--btn-primary-bg).
 
 App Personalization:
-- app.config.json is the source of truth for app name, description, theme color, and slug.
-- Docker service names must reference values in app.config.json (e.g., <slug>-backend).
-- The frontend reads app config from /app.config.json (served from public/).
-- Use the useAppConfig() hook to access app configuration in React components.
+    - system.config.json is the source of truth for app name, description, theme color, slug, and layout.
+- Docker service names must reference values in system.config.json (e.g., <slug>-backend).
+- The frontend reads config from /system.config.json (served from public/).
+- Use the useSystemConfig() hook to access system configuration in React components.
 
 File Locations:
 - Design tokens: frontend/src/design-system/design-tokens.css
 - Design docs: frontend/src/design-system/design-system.md
 - UI components: frontend/src/components/ui/
-- App config: app.config.json and frontend/public/app.config.json
+- System config: system.config.json and frontend/public/system.config.json
+
+System Rules:
+- system.config.json is the single source of truth for app configuration.
+- UI layout must use AppShell, Sidebar, and HeaderBar components.
+- Only design-system components allowed for UI (Button, Input, Card, etc.).
+- No direct color values in classnames or inline styles - use CSS variables.
+- Sidebar collapsed state is persisted in localStorage.
+- All form validation must mirror backend Pydantic schemas.
+
+Layout Components:
+- AppShell: Main layout wrapper with sidebar, header, and content area.
+- Sidebar: Collapsible navigation with localStorage persistence.
+- HeaderBar: Top navigation bar with breadcrumbs and user menu.
+
+Verification:
+- Run ./verify-project.sh to check project configuration and compliance.
+- Fix any warnings or errors before deployment.

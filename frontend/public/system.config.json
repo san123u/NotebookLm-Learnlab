@@ -1,0 +1,14 @@
+{
+  "app": {
+    "name": "Core Platform",
+    "slug": "core-platform",
+    "description": "Core Platform - Built with Core Platform Template",
+    "type": "saas-dashboard"
+  },
+  "theme": {
+    "primaryColor": "indigo"
+  },
+  "layout": {
+    "sidebarCollapsedByDefault": false
+  }
+}

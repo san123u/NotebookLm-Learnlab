@@ -125,8 +125,8 @@ main() {
     cd "$SCRIPT_DIR"
 
     # Check if already initialized
-    if [[ -f "app.config.json" ]]; then
-        print_warning "Project already initialized (app.config.json exists)"
+    if [[ -f "system.config.json" ]]; then
+        print_warning "Project already initialized (system.config.json exists)"
         read -p "Do you want to re-initialize? This will overwrite existing config [y/N]: " reinit
         if [[ "$reinit" != "y" && "$reinit" != "Y" ]]; then
             echo "Aborted."
@@ -224,13 +224,13 @@ ${BOLD}Proceed with initialization?${NC} [Y/n]: " CONFIRM
     JWT_SECRET=$(generate_secret 32)
     MONGO_PASSWORD=$(generate_secret 16)
 
-    # Create app.config.json
+    # Create system.config.json
     echo ""
     echo "  Creating configuration files..."
 
     CREATED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-    cat > app.config.json << EOF
+    cat > system.config.json << EOF
 {
   "app": {
     "name": "$APP_NAME",
@@ -241,14 +241,17 @@ ${BOLD}Proceed with initialization?${NC} [Y/n]: " CONFIRM
   "theme": {
     "primaryColor": "$PRIMARY_COLOR"
   },
+  "layout": {
+    "sidebarCollapsedByDefault": false
+  },
   "created_at": "$CREATED_AT"
 }
 EOF
-    print_step "Created app.config.json"
+    print_step "Created system.config.json"
 
     # Copy to frontend/public
-    cp app.config.json frontend/public/app.config.json
-    print_step "Created frontend/public/app.config.json"
+    cp system.config.json frontend/public/system.config.json
+    print_step "Created frontend/public/system.config.json"
 
     # Create .env from .env.example
     if [[ -f ".env" ]]; then
@@ -343,7 +346,7 @@ ${BOLD}Next steps:${NC}
      - Email: ADMIN_EMAIL
      - Password: ADMIN_PASSWORD
 
-${DIM}Configuration saved to app.config.json${NC}
+${DIM}Configuration saved to system.config.json${NC}
 "
 }
 

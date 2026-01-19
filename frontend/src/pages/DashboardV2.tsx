@@ -1,8 +1,12 @@
 import { Link } from 'react-router-dom';
-import { Settings, Users, Globe } from 'lucide-react';
+import { Settings, Users, Globe, TrendingUp, Activity, Calendar } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useSystemConfig } from '../hooks/useSystemConfig';
+import { Card, CardHeader } from '../components/ui/Card';
+import { Badge } from '../components/ui/Badge';
+import { Button } from '../components/ui/Button';
 
-interface DashboardCard {
+interface QuickAction {
   name: string;
   description: string;
   href: string;
@@ -10,7 +14,7 @@ interface DashboardCard {
   adminOnly?: boolean;
 }
 
-const dashboardCards: DashboardCard[] = [
+const quickActions: QuickAction[] = [
   {
     name: 'Account Settings',
     description: 'Manage your profile and preferences',
@@ -33,59 +37,147 @@ const dashboardCards: DashboardCard[] = [
   },
 ];
 
+// Mock stats for demonstration
+const stats = [
+  {
+    label: 'Total Users',
+    value: '1,234',
+    change: '+12%',
+    trend: 'up' as const,
+    icon: Users,
+  },
+  {
+    label: 'Active Sessions',
+    value: '89',
+    change: '+5%',
+    trend: 'up' as const,
+    icon: Activity,
+  },
+  {
+    label: 'This Week',
+    value: '156',
+    change: '-3%',
+    trend: 'down' as const,
+    icon: Calendar,
+  },
+  {
+    label: 'Growth',
+    value: '23.5%',
+    change: '+8%',
+    trend: 'up' as const,
+    icon: TrendingUp,
+  },
+];
+
 export default function DashboardV2() {
   const { user, isSuperAdmin } = useAuth();
+  const { config } = useSystemConfig();
 
-  const filteredCards = dashboardCards.filter(
-    (card) => !card.adminOnly || isSuperAdmin
+  const filteredActions = quickActions.filter(
+    (action) => !action.adminOnly || isSuperAdmin
   );
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto space-y-8">
       {/* Welcome Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">
-          Welcome{user?.first_name ? `, ${user.first_name}` : ''}!
-        </h1>
-        <p className="text-gray-600 mt-2">
-          This is your dashboard. Get started by exploring the options below.
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Welcome{user?.first_name ? `, ${user.first_name}` : ''}!
+          </h1>
+          <p className="text-gray-600 mt-2">
+            This is your {config.app.name} dashboard. Here's what's happening today.
+          </p>
+        </div>
+        <Badge variant="primary" size="md">
+          {config.app.type.replace(/-/g, ' ')}
+        </Badge>
       </div>
 
-      {/* Quick Actions Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredCards.map((card) => (
-          <Link
-            key={card.name}
-            to={card.href}
-            className="group p-6 bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all"
-          >
-            <div className="flex items-start gap-4">
-              <div className="p-3 rounded-lg bg-gray-100 group-hover:bg-blue-100 transition-colors">
-                <card.icon className="w-6 h-6 text-gray-600 group-hover:text-blue-600 transition-colors" />
-              </div>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {stats.map((stat) => (
+          <Card key={stat.label} className="hover:shadow-md transition-shadow">
+            <div className="flex items-start justify-between">
               <div>
-                <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-                  {card.name}
-                </h3>
-                <p className="text-sm text-gray-500 mt-1">{card.description}</p>
+                <p className="text-sm font-medium text-gray-500">{stat.label}</p>
+                <p className="mt-2 text-2xl font-bold text-gray-900">{stat.value}</p>
+                <div className="flex items-center mt-1">
+                  <Badge
+                    variant={stat.trend === 'up' ? 'success' : 'danger'}
+                    size="sm"
+                  >
+                    {stat.change}
+                  </Badge>
+                  <span className="text-xs text-gray-400 ml-2">vs last month</span>
+                </div>
+              </div>
+              <div className="p-3 bg-[var(--color-app-primary-100)] rounded-lg">
+                <stat.icon className="w-5 h-5 text-[var(--btn-primary-bg)]" />
               </div>
             </div>
-          </Link>
+          </Card>
         ))}
       </div>
 
-      {/* Info Section */}
-      <div className="mt-12 p-6 bg-blue-50 rounded-xl">
-        <h2 className="text-lg font-semibold text-blue-900 mb-2">
-          Getting Started
-        </h2>
-        <p className="text-blue-800">
-          This is a core platform template. Use it as a foundation for building
-          your own applications with authentication, user management, and
-          multi-tenant support built-in.
-        </p>
-      </div>
+      {/* Quick Actions */}
+      <Card>
+        <CardHeader
+          title="Quick Actions"
+          subtitle="Get started with common tasks"
+        />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredActions.map((action) => (
+            <Link
+              key={action.name}
+              to={action.href}
+              className="group flex items-start gap-4 p-4 rounded-lg border border-gray-100 hover:border-[var(--btn-primary-bg)] hover:shadow-sm transition-all"
+            >
+              <div className="p-3 rounded-lg bg-gray-100 group-hover:bg-[var(--color-app-primary-100)] transition-colors">
+                <action.icon className="w-5 h-5 text-gray-600 group-hover:text-[var(--btn-primary-bg)] transition-colors" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 group-hover:text-[var(--btn-primary-bg)] transition-colors">
+                  {action.name}
+                </h3>
+                <p className="text-sm text-gray-500 mt-1">{action.description}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </Card>
+
+      {/* Getting Started Card */}
+      <Card className="bg-gradient-to-r from-[var(--color-app-primary-50)] to-[var(--color-app-primary-100)] border-[var(--color-app-primary-200)]">
+        <div className="flex items-start justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-[var(--color-app-primary-900)] mb-2">
+              Getting Started
+            </h2>
+            <p className="text-[var(--color-app-primary-800)] max-w-xl">
+              This is a core platform template. Use it as a foundation for building
+              your own applications with authentication, user management, and
+              multi-tenant support built-in.
+            </p>
+            <div className="flex gap-3 mt-4">
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => window.open('/design-system', '_blank')}
+              >
+                View Design System
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.open('/api/docs', '_blank')}
+              >
+                API Documentation
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Card>
     </div>
   );
 }

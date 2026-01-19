@@ -2,10 +2,13 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
   Settings,
+  User,
   PanelLeftClose,
   PanelLeft,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { useSystemConfig } from '../../hooks/useSystemConfig';
+import { Button } from '../ui/Button';
 
 interface SidebarProps {
   collapsed?: boolean;
@@ -20,10 +23,13 @@ interface NavItem {
 
 const navigation: NavItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Account Settings', href: '/dashboard/account', icon: Settings },
+  { name: 'Profile', href: '/dashboard/my-profile', icon: User },
+  { name: 'Settings', href: '/dashboard/account', icon: Settings },
 ];
 
 export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
+  const { config } = useSystemConfig();
+
   return (
     <div
       className={cn(
@@ -38,22 +44,23 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
       )}>
         {!collapsed && (
           <div className="flex items-center gap-2">
-            <span className="font-bold text-white text-xl">
-              Core Platform
+            <div className="w-8 h-8 bg-[var(--btn-primary-bg)] rounded-lg flex items-center justify-center flex-shrink-0">
+              <span className="text-white font-bold text-sm">
+                {config.app.name.charAt(0).toUpperCase()}
+              </span>
+            </div>
+            <span className="font-bold text-white text-lg truncate">
+              {config.app.name}
             </span>
           </div>
         )}
-        <button
-          onClick={onToggle}
-          className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
-          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        >
-          {collapsed ? (
-            <PanelLeft className="w-5 h-5" />
-          ) : (
-            <PanelLeftClose className="w-5 h-5" />
-          )}
-        </button>
+        {collapsed && (
+          <div className="w-8 h-8 bg-[var(--btn-primary-bg)] rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">
+              {config.app.name.charAt(0).toUpperCase()}
+            </span>
+          </div>
+        )}
       </div>
 
       <nav className={cn('flex-1 py-4 space-y-1 overflow-y-auto', collapsed ? 'px-2' : 'px-3')}>
@@ -78,6 +85,32 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
           </NavLink>
         ))}
       </nav>
+
+      {/* Collapse Toggle at Bottom */}
+      <div className={cn(
+        'p-3 border-t border-gray-800',
+        collapsed ? 'flex justify-center' : ''
+      )}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onToggle}
+          className={cn(
+            'text-gray-400 hover:text-white hover:bg-gray-800',
+            collapsed ? 'p-2' : 'w-full justify-start'
+          )}
+          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          {collapsed ? (
+            <PanelLeft className="w-5 h-5" />
+          ) : (
+            <>
+              <PanelLeftClose className="w-5 h-5 mr-2" />
+              <span>Collapse</span>
+            </>
+          )}
+        </Button>
+      </div>
     </div>
   );
 }

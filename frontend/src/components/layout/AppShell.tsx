@@ -1,14 +1,26 @@
+/**
+ * AppShell - Main application layout wrapper
+ *
+ * Provides the primary layout structure with:
+ * - Collapsible sidebar
+ * - Header bar with breadcrumbs and user menu
+ * - Main content area
+ * - Footer
+ *
+ * Sidebar collapsed state is persisted to localStorage.
+ */
+
 import { useState, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
-import { DashboardHeader } from './DashboardHeader';
+import { HeaderBar } from './HeaderBar';
 import { useSystemConfig } from '../../hooks/useSystemConfig';
 
 const SIDEBAR_COLLAPSED_KEY = 'sidebar-collapsed';
 
-export function Layout() {
+export function AppShell() {
   const location = useLocation();
-  const { config } = useSystemConfig();
+  const { config, loading } = useSystemConfig();
 
   // Initialize from localStorage or system config default
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
@@ -16,8 +28,18 @@ export function Layout() {
     if (stored !== null) {
       return stored === 'true';
     }
-    return config.layout.sidebarCollapsedByDefault;
+    return false; // Will be updated when config loads
   });
+
+  // Update from config once loaded (only if no localStorage value)
+  useEffect(() => {
+    if (!loading) {
+      const stored = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
+      if (stored === null) {
+        setSidebarCollapsed(config.layout.sidebarCollapsedByDefault);
+      }
+    }
+  }, [loading, config.layout.sidebarCollapsedByDefault]);
 
   // Persist to localStorage when changed
   useEffect(() => {
@@ -25,7 +47,6 @@ export function Layout() {
   }, [sidebarCollapsed]);
 
   // Check if we're on a chat route (no padding, no header for full-screen experience)
-  // All chat routes are now under /dashboard/chat/*
   const isChatRoute = location.pathname.startsWith('/dashboard/chat');
 
   return (
@@ -36,7 +57,7 @@ export function Layout() {
       />
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header with breadcrumbs and profile - hidden for chat routes */}
-        {!isChatRoute && <DashboardHeader />}
+        {!isChatRoute && <HeaderBar />}
 
         {/* Main content area */}
         <main className="flex-1 overflow-auto">
@@ -54,8 +75,8 @@ export function Layout() {
         {!isChatRoute && (
           <footer className="bg-white border-t border-gray-200 py-3 px-6">
             <div className="flex items-center justify-between text-xs text-gray-400">
-              <span>© {new Date().getFullYear()} International Holding Company</span>
-              <span>XAILON - IHC Analytics Platform</span>
+              <span>&copy; {new Date().getFullYear()} {config.app.name}</span>
+              <span>{config.app.description}</span>
             </div>
           </footer>
         )}
@@ -63,3 +84,5 @@ export function Layout() {
     </div>
   );
 }
+
+export default AppShell;

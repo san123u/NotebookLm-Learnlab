@@ -160,4 +160,72 @@ Run `./init-project.sh` to:
 2. Choose primary color
 3. Generate `.env` with secure secrets
 4. Update Docker service names
-5. Create `app.config.json`
+5. Create `system.config.json`
+
+## System Architecture Rules
+
+### Configuration
+- App configuration is read from `system.config.json`.
+- Frontend uses `useSystemConfig()` hook to access configuration.
+- Configuration includes: app name, slug, description, type, theme color, and layout settings.
+
+### Layout System
+- `AppShell` is the main layout wrapper component.
+- `Sidebar` provides collapsible navigation (state persisted in localStorage).
+- `HeaderBar` provides top navigation with breadcrumbs and user menu.
+- All protected routes should use AppShell as the layout wrapper.
+
+### UI Components
+- All UI components must come from `frontend/src/components/ui/`.
+- Never use raw `<input>`, `<button>`, `<select>`, or `<textarea>` elements.
+- Use the Button component for all buttons.
+- Use the Input component for all text inputs.
+- Use the Select component for all dropdowns.
+- Use the Card component for content containers.
+
+### Validation
+- Frontend validation is in `frontend/src/lib/validation.ts`.
+- Backend validation uses Pydantic schemas in `backend/app/modules/auth/schemas.py`.
+- Keep frontend and backend validation rules in sync.
+- Frontend validation functions mirror Pydantic schemas:
+  - `validateLoginForm` → `LoginRequest`
+  - `validateSignupForm` → `SignupRequest`
+  - `validateResetPasswordForm` → `ResetPasswordRequest`
+
+### Design Tokens
+- All colors come from `frontend/src/design-system/design-tokens.css`.
+- Use CSS variables like `var(--btn-primary-bg)` for colors.
+- Never hardcode color values in components.
+- Primary color scale: `--color-app-primary-50` to `--color-app-primary-900`.
+
+### Verification
+- Run `./verify-project.sh` to validate project configuration.
+- The script checks: config files, Docker setup, design system compliance, and YAML validity.
+- Fix all warnings and errors before deployment.
+
+## Safe Code Generation
+
+### Protected Files (Do Not Modify Without Review)
+- `backend/app/core/*` - Core configuration and database setup
+- `backend/app/auth/*` - Authentication utilities
+- `frontend/src/components/ui/*` - Design system components
+- `frontend/src/design-system/*` - Design tokens
+- `system.config.json` - System configuration
+- `.cursorrules` - AI coding rules
+- `ai-guidelines.md` - Development guidelines
+
+### Restricted Modifications
+- Do not change the tech stack (FastAPI, React, MongoDB, etc.)
+- Do not modify docker-compose.yml without explicit approval
+- Do not bypass authentication or RBAC checks
+- Do not create new databases
+- Do not introduce new frameworks or libraries
+
+### Code Generation Best Practices
+1. Always use design system components for UI
+2. Follow existing naming conventions
+3. Validate inputs on both frontend and backend
+4. Use TypeScript strict mode
+5. Handle errors appropriately
+6. Write async/await for all database operations
+7. Use dependency injection via FastAPI's Depends()
