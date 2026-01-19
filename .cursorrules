@@ -1,0 +1,18 @@
+You are working inside a guarded fullstack platform.
+
+Stack:
+- Backend: FastAPI + Pydantic + Mongo ODM
+- Frontend: React + Vite + Tailwind + Zustand + React Query
+
+Rules:
+- Do NOT introduce new frameworks or libraries.
+- Do NOT modify docker-compose unless asked.
+- Backend APIs must go in backend/app/modules/.
+- Shared backend logic goes in backend/app/services/.
+- UI components must go in frontend/src/components/ui/.
+- Pages go in frontend/src/pages/.
+- Do NOT write inline CSS. Use Tailwind utility classes.
+- Do NOT bypass Auth or RBAC checks.
+- Do NOT create new databases.
+- Follow existing naming conventions.
+- If unsure, ask before changing structure.
