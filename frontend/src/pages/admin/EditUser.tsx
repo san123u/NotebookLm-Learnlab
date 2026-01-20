@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   UserCog,
   Mail,
@@ -18,10 +20,27 @@ import {
   getUser,
   updateUser,
 } from '../../lib/api';
-import { validatePassword } from '../../lib/validation';
+import { updateUserSchema, type UpdateUserFormData } from '../../lib/schemas';
+import { getErrorMessage } from '../../lib/api-error';
 import { Button } from '../../components/ui/Button';
+import { Input } from '../../components/ui/Input';
+import { Select } from '../../components/ui/Select';
 import { PageLayout } from '../../components/layout/PageLayout';
 import type { UpdateUserRequest } from '../../types';
+
+const roleOptions = [
+  { value: '', label: 'Viewer (Default)' },
+  { value: 'viewer', label: 'Viewer' },
+  { value: 'editor', label: 'Editor' },
+  { value: 'admin', label: 'Admin' },
+  { value: 'super_admin', label: 'Super Admin (Full access)' },
+];
+
+const statusOptions = [
+  { value: 'active', label: 'Active' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'suspended', label: 'Suspended' },
+];
 
 export function EditUserPage() {
   const navigate = useNavigate();
@@ -35,29 +54,44 @@ export function EditUserPage() {
     enabled: !!userId,
   });
 
-  // Form state
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [department, setDepartment] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [systemRole, setSystemRole] = useState<'super_admin' | 'admin' | 'editor' | 'viewer' | ''>('');
-  const [status, setStatus] = useState<string>('active');
-  const [password, setPassword] = useState('');
+  // React Hook Form with Zod validation
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setError,
+    reset,
+    watch,
+  } = useForm<UpdateUserFormData>({
+    resolver: zodResolver(updateUserSchema),
+    defaultValues: {
+      first_name: '',
+      last_name: '',
+      department: '',
+      phone_number: '',
+      role: '',
+      status: 'active',
+      password: '',
+    },
+  });
 
-  // Error/success state
-  const [error, setError] = useState<string | null>(null);
+  // Watch role for helper text
+  const systemRole = watch('role');
 
   // Populate form when user data loads
   useEffect(() => {
     if (user) {
-      setFirstName(user.first_name || '');
-      setLastName(user.last_name || '');
-      setDepartment(user.department || '');
-      setPhoneNumber(user.phone_number || '');
-      setSystemRole((user.role as typeof systemRole) || '');
-      setStatus(user.status || 'active');
+      reset({
+        first_name: user.first_name || '',
+        last_name: user.last_name || '',
+        department: user.department || '',
+        phone_number: user.phone_number || '',
+        role: (user.role as UpdateUserFormData['role']) || '',
+        status: (user.status as UpdateUserFormData['status']) || 'active',
+        password: '',
+      });
     }
-  }, [user]);
+  }, [user, reset]);
 
   // Update user mutation
   const updateMutation = useMutation({
@@ -70,35 +104,28 @@ export function EditUserPage() {
       queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
       navigate('/admin/users');
     },
-    onError: (err: Error & { response?: { data?: { detail?: string } } }) => {
-      setError(err.response?.data?.detail || err.message || 'Failed to update user');
+    onError: (err: unknown) => {
+      setError('root', { message: getErrorMessage(err) });
     },
   });
 
   // Submit form
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    const data: UpdateUserRequest = {
-      first_name: firstName || undefined,
-      last_name: lastName || undefined,
-      department: department || undefined,
-      phone_number: phoneNumber || undefined,
-      role: systemRole || undefined,
-      status,
+  const onSubmit = (data: UpdateUserFormData) => {
+    const updateData: UpdateUserRequest = {
+      first_name: data.first_name || undefined,
+      last_name: data.last_name || undefined,
+      department: data.department || undefined,
+      phone_number: data.phone_number || undefined,
+      role: data.role || undefined,
+      status: data.status,
     };
 
-    if (password) {
-      const passwordValidation = validatePassword(password);
-      if (!passwordValidation.isValid) {
-        setError(passwordValidation.errors[0]);
-        return;
-      }
-      data.password = password;
+    // Only include password if provided
+    if (data.password) {
+      updateData.password = data.password;
     }
 
-    updateMutation.mutate(data);
+    updateMutation.mutate(updateData);
   };
 
   if (userLoading) {
@@ -118,6 +145,19 @@ export function EditUserPage() {
     );
   }
 
+  const getRoleHelperText = () => {
+    switch (systemRole) {
+      case 'super_admin':
+        return 'Full system access - can see and modify everything';
+      case 'admin':
+        return 'Can manage users and most settings';
+      case 'editor':
+        return 'Can edit content but not manage users';
+      default:
+        return 'Read-only access';
+    }
+  };
+
   return (
     <PageLayout
       title="Edit User"
@@ -127,17 +167,17 @@ export function EditUserPage() {
       maxWidth="4xl"
     >
       {/* Error Alert */}
-      {error && (
+      {errors.root && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
           <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
-          <p className="text-red-700">{error}</p>
-          <button onClick={() => setError(null)} className="ml-auto">
+          <p className="text-red-700">{errors.root.message}</p>
+          <button onClick={() => setError('root', {})} className="ml-auto">
             <X className="w-4 h-4 text-red-600" />
           </button>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" autoComplete="off">
         {/* Account Details */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
@@ -145,33 +185,24 @@ export function EditUserPage() {
             Account Details
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input
-                type="email"
-                value={user.email}
-                disabled
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-500"
+            <Input
+              label="Email"
+              type="email"
+              value={user.email}
+              disabled
+              helperText="Email cannot be changed"
+            />
+            <div className="relative">
+              <Input
+                label="New Password"
+                type="password"
+                placeholder="Min 8 characters"
+                autoComplete="new-password"
+                helperText="Leave blank to keep current"
+                error={errors.password?.message}
+                {...register('password')}
               />
-              <p className="text-xs text-gray-400 mt-1">Email cannot be changed</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                New Password
-                <span className="text-gray-400 font-normal"> (leave blank to keep current)</span>
-              </label>
-              <div className="relative">
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Min 8 characters"
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  minLength={8}
-                  autoComplete="new-password"
-                />
-                <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              </div>
+              <Lock className="absolute right-3 top-[38px] w-4 h-4 text-gray-400" />
             </div>
           </div>
         </div>
@@ -183,51 +214,39 @@ export function EditUserPage() {
             Profile Details
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-              <input
+            <Input
+              label="First Name"
+              type="text"
+              placeholder="John"
+              error={errors.first_name?.message}
+              {...register('first_name')}
+            />
+            <Input
+              label="Last Name"
+              type="text"
+              placeholder="Doe"
+              error={errors.last_name?.message}
+              {...register('last_name')}
+            />
+            <div className="relative">
+              <Input
+                label="Department"
                 type="text"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                placeholder="John"
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="Engineering"
+                error={errors.department?.message}
+                {...register('department')}
               />
+              <Briefcase className="absolute right-3 top-[38px] w-4 h-4 text-gray-400" />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-              <input
-                type="text"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                placeholder="Doe"
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            <div className="relative">
+              <Input
+                label="Phone Number"
+                type="tel"
+                placeholder="+1 234 567 8900"
+                error={errors.phone_number?.message}
+                {...register('phone_number')}
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={department}
-                  onChange={(e) => setDepartment(e.target.value)}
-                  placeholder="Engineering"
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-                <Briefcase className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-              <div className="relative">
-                <input
-                  type="tel"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  placeholder="+1 234 567 8900"
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-                <Phone className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              </div>
+              <Phone className="absolute right-3 top-[38px] w-4 h-4 text-gray-400" />
             </div>
           </div>
         </div>
@@ -239,36 +258,21 @@ export function EditUserPage() {
             Role & Status
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Select
+              label="Status"
+              options={statusOptions}
+              error={errors.status?.message}
+              {...register('status')}
+            />
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
-              >
-                <option value="active">Active</option>
-                <option value="pending">Pending</option>
-                <option value="suspended">Suspended</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">System Role</label>
-              <select
-                value={systemRole}
-                onChange={(e) => setSystemRole(e.target.value as typeof systemRole)}
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                <option value="">Viewer (Default)</option>
-                <option value="viewer">Viewer</option>
-                <option value="editor">Editor</option>
-                <option value="admin">Admin</option>
-                <option value="super_admin">Super Admin (Full access)</option>
-              </select>
+              <Select
+                label="System Role"
+                options={roleOptions}
+                error={errors.role?.message}
+                {...register('role')}
+              />
               <p className="mt-1 text-sm text-gray-500">
-                {systemRole === 'super_admin' && 'Full system access - can see and modify everything'}
-                {systemRole === 'admin' && 'Can manage users and most settings'}
-                {systemRole === 'editor' && 'Can edit content but not manage users'}
-                {(systemRole === 'viewer' || !systemRole) && 'Read-only access'}
+                {getRoleHelperText()}
               </p>
             </div>
           </div>

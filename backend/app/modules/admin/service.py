@@ -7,6 +7,8 @@ import bcrypt
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from pymongo.errors import DuplicateKeyError
 
+from app.core.error_codes import ErrorCode
+from app.core.exceptions import ConflictError, NotFoundError
 from app.odm.user import UserDocument
 from app.modules.admin.schemas import (
     UserListParams,
@@ -92,11 +94,14 @@ class AdminService:
             pages=pages,
         )
 
-    async def get_user(self, user_uuid: str) -> Optional[UserResponse]:
+    async def get_user(self, user_uuid: str) -> UserResponse:
         """Get a single user by UUID."""
         user = await UserDocument.find_by_uuid(user_uuid)
         if not user:
-            return None
+            raise NotFoundError(
+                message="User not found",
+                code=ErrorCode.USER_NOT_FOUND
+            )
         return user_to_response(user)
 
     async def create_user(
@@ -108,7 +113,10 @@ class AdminService:
         # Check if email already exists
         existing = await UserDocument.find_by_email(data.email)
         if existing:
-            raise ValueError(f"User with email {data.email} already exists")
+            raise ConflictError(
+                message=f"User with email {data.email} already exists",
+                code=ErrorCode.EMAIL_ALREADY_EXISTS
+            )
 
         try:
             user = await UserDocument.create(
@@ -123,7 +131,10 @@ class AdminService:
                 otp_verified=True,  # Skip OTP verification for admin-created users
             )
         except DuplicateKeyError:
-            raise ValueError(f"User with email {data.email} already exists")
+            raise ConflictError(
+                message=f"User with email {data.email} already exists",
+                code=ErrorCode.EMAIL_ALREADY_EXISTS
+            )
 
         return user_to_response(user)
 
@@ -132,11 +143,14 @@ class AdminService:
         user_uuid: str,
         data: UpdateUserRequest,
         updated_by: str
-    ) -> Optional[UserResponse]:
+    ) -> UserResponse:
         """Update a user."""
         user = await UserDocument.find_by_uuid(user_uuid)
         if not user:
-            return None
+            raise NotFoundError(
+                message="User not found",
+                code=ErrorCode.USER_NOT_FOUND
+            )
 
         # Update fields if provided
         if data.first_name is not None:
@@ -159,15 +173,17 @@ class AdminService:
         await user.save()
         return user_to_response(user)
 
-    async def delete_user(self, user_uuid: str) -> bool:
+    async def delete_user(self, user_uuid: str) -> None:
         """Delete (suspend) a user."""
         user = await UserDocument.find_by_uuid(user_uuid)
         if not user:
-            return False
+            raise NotFoundError(
+                message="User not found",
+                code=ErrorCode.USER_NOT_FOUND
+            )
 
         user.status = "suspended"
         await user.save()
-        return True
 
     async def get_stats(self) -> AdminStatsResponse:
         """Get admin dashboard statistics."""

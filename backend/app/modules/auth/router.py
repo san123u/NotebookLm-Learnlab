@@ -4,7 +4,7 @@ Authentication router.
 Handles user login, signup, OTP verification, and password reset.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, Request
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from app.api.deps import get_db, get_current_user
@@ -39,9 +39,6 @@ async def login(
     service = AuthService(db)
     result = await service.login(request.email, request.password)
 
-    if "error" in result:
-        raise HTTPException(status_code=result["status"], detail=result["error"])
-
     return TokenResponse(
         access_token=result["access_token"],
         expires_at=result["expires_at"],
@@ -60,17 +57,12 @@ async def signup(
     await check_rate_limit(req, "signup", max_requests=5, window_seconds=60)
 
     service = AuthService(db)
-    result = await service.signup(
+    return await service.signup(
         request.email,
         request.password,
         request.first_name,
         request.last_name,
     )
-
-    if "error" in result:
-        raise HTTPException(status_code=result["status"], detail=result["error"])
-
-    return result
 
 
 @router.post("/verify-otp", response_model=TokenResponse)
@@ -78,9 +70,6 @@ async def verify_otp(request: VerifyOTPRequest, db: AsyncIOMotorDatabase = Depen
     """Verify OTP and activate account. Returns JWT token on success."""
     service = AuthService(db)
     result = await service.verify_otp(request.email, request.otp)
-
-    if "error" in result:
-        raise HTTPException(status_code=result["status"], detail=result["error"])
 
     return TokenResponse(
         access_token=result["access_token"],
@@ -100,24 +89,14 @@ async def forgot_password(
     await check_rate_limit(req, "forgot_password", max_requests=5, window_seconds=60)
 
     service = AuthService(db)
-    result = await service.forgot_password(request.email)
-
-    if "error" in result:
-        raise HTTPException(status_code=result["status"], detail=result["error"])
-
-    return result
+    return await service.forgot_password(request.email)
 
 
 @router.post("/reset-password", response_model=dict)
 async def reset_password(request: ResetPasswordRequest, db: AsyncIOMotorDatabase = Depends(get_db)):
     """Reset password using OTP."""
     service = AuthService(db)
-    result = await service.reset_password(request.email, request.otp, request.new_password)
-
-    if "error" in result:
-        raise HTTPException(status_code=result["status"], detail=result["error"])
-
-    return result
+    return await service.reset_password(request.email, request.otp, request.new_password)
 
 
 @router.get("/me", response_model=UserResponse)
@@ -155,12 +134,7 @@ async def request_login_otp(
     await check_rate_limit(req, "request_otp", max_requests=5, window_seconds=60)
 
     service = AuthService(db)
-    result = await service.request_login_otp(request.email)
-
-    if "error" in result:
-        raise HTTPException(status_code=result["status"], detail=result["error"])
-
-    return result
+    return await service.request_login_otp(request.email)
 
 
 @router.post("/verify-login-otp", response_model=TokenResponse)
@@ -168,9 +142,6 @@ async def verify_login_otp(request: VerifyLoginOTPRequest, db: AsyncIOMotorDatab
     """Verify OTP for passwordless login. Returns JWT token on success."""
     service = AuthService(db)
     result = await service.verify_login_otp(request.email, request.otp)
-
-    if "error" in result:
-        raise HTTPException(status_code=result["status"], detail=result["error"])
 
     return TokenResponse(
         access_token=result["access_token"],

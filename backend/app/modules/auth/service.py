@@ -16,6 +16,15 @@ from pymongo.errors import DuplicateKeyError
 
 from app.auth.jwt import create_access_token
 from app.auth.passwords import hash_password, verify_password
+from app.core.error_codes import ErrorCode
+from app.core.exceptions import (
+    AuthenticationError,
+    AuthorizationError,
+    ConflictError,
+    NotFoundError,
+    RateLimitError,
+    ValidationError,
+)
 from app.services.email import send_otp_email
 from app.utils.email_validation import validate_email_for_auth_async
 
@@ -155,21 +164,36 @@ class AuthService:
         # Validate email domain (checks both basic and custom blocklists)
         validation = await validate_email_for_auth_async(email)
         if not validation.is_valid:
-            return {"error": validation.error_message, "status": 400}
+            raise ValidationError(
+                message=validation.error_message,
+                code=ErrorCode.INVALID_EMAIL_DOMAIN
+            )
 
         user = await self.db.users.find_one({"email": email.lower()})
 
         if not user:
-            return {"error": "Invalid email or password", "status": 401}
+            raise AuthenticationError(
+                message="Invalid email or password",
+                code=ErrorCode.INVALID_CREDENTIALS
+            )
 
         if not user.get("password_hash") or not verify_password(password, user["password_hash"]):
-            return {"error": "Invalid email or password", "status": 401}
+            raise AuthenticationError(
+                message="Invalid email or password",
+                code=ErrorCode.INVALID_CREDENTIALS
+            )
 
         if user.get("status") == "pending":
-            return {"error": "Please verify your email first", "status": 403}
+            raise AuthorizationError(
+                message="Please verify your email first",
+                code=ErrorCode.EMAIL_NOT_VERIFIED
+            )
 
         if user.get("status") == "suspended":
-            return {"error": "Your account has been suspended", "status": 403}
+            raise AuthorizationError(
+                message="Your account has been suspended",
+                code=ErrorCode.ACCOUNT_SUSPENDED
+            )
 
         # Auto-link agent if email matches
         agent_link_result = await self._auto_link_agent(user)
@@ -215,12 +239,18 @@ class AuthService:
         # Validate email domain (checks both basic and custom blocklists)
         validation = await validate_email_for_auth_async(email)
         if not validation.is_valid:
-            return {"error": validation.error_message, "status": 400}
+            raise ValidationError(
+                message=validation.error_message,
+                code=ErrorCode.INVALID_EMAIL_DOMAIN
+            )
 
         existing = await self.db.users.find_one({"email": email.lower()})
 
         if existing:
-            return {"error": "Email already registered", "status": 400}
+            raise ConflictError(
+                message="Email already registered",
+                code=ErrorCode.EMAIL_ALREADY_EXISTS
+            )
 
         password_hash = hash_password(password)
         otp = generate_otp()
@@ -247,7 +277,10 @@ class AuthService:
             await self.db.users.insert_one(user)
         except DuplicateKeyError:
             # Race condition: another request created this user between our check and insert
-            return {"error": "Email already registered", "status": 400}
+            raise ConflictError(
+                message="Email already registered",
+                code=ErrorCode.EMAIL_ALREADY_EXISTS
+            )
 
         await send_otp_email(email, otp, "signup")
 
@@ -261,15 +294,24 @@ class AuthService:
         user = await self.db.users.find_one({"email": email.lower()})
 
         if not user:
-            return {"error": "User not found", "status": 404}
+            raise NotFoundError(
+                message="User not found",
+                code=ErrorCode.USER_NOT_FOUND
+            )
 
         # Check master OTP or regular OTP
         if MASTER_OTP and otp == MASTER_OTP:
             pass
         elif user.get("otp") != otp:
-            return {"error": "Invalid OTP", "status": 400}
+            raise ValidationError(
+                message="Invalid OTP",
+                code=ErrorCode.INVALID_OTP
+            )
         elif user.get("otp_expires_at") and datetime.utcnow() > user["otp_expires_at"]:
-            return {"error": "OTP has expired", "status": 400}
+            raise ValidationError(
+                message="OTP has expired",
+                code=ErrorCode.OTP_EXPIRED
+            )
 
         # Activate user
         await self.db.users.update_one(
@@ -327,7 +369,10 @@ class AuthService:
         # Validate email domain (checks both basic and custom blocklists)
         validation = await validate_email_for_auth_async(email)
         if not validation.is_valid:
-            return {"error": validation.error_message, "status": 400}
+            raise ValidationError(
+                message=validation.error_message,
+                code=ErrorCode.INVALID_EMAIL_DOMAIN
+            )
 
         user = await self.db.users.find_one({"email": email.lower()})
 
@@ -336,16 +381,19 @@ class AuthService:
 
         # Don't allow password reset for suspended users
         if user.get("status") == "suspended":
-            return {"error": "Your account has been suspended", "status": 403}
+            raise AuthorizationError(
+                message="Your account has been suspended",
+                code=ErrorCode.ACCOUNT_SUSPENDED
+            )
 
         # Check cooldown
         remaining = check_otp_cooldown(user)
         if remaining:
-            return {
-                "error": f"Please wait {remaining} seconds before requesting another code.",
-                "status": 429,
-                "retry_after": remaining
-            }
+            raise RateLimitError(
+                message=f"Please wait {remaining} seconds before requesting another code.",
+                retry_after=remaining,
+                code=ErrorCode.OTP_COOLDOWN
+            )
 
         otp = generate_otp()
         now = datetime.utcnow()
@@ -369,18 +417,30 @@ class AuthService:
         user = await self.db.users.find_one({"email": email.lower()})
 
         if not user:
-            return {"error": "User not found", "status": 404}
+            raise NotFoundError(
+                message="User not found",
+                code=ErrorCode.USER_NOT_FOUND
+            )
 
         # Don't allow password reset for suspended users
         if user.get("status") == "suspended":
-            return {"error": "Your account has been suspended", "status": 403}
+            raise AuthorizationError(
+                message="Your account has been suspended",
+                code=ErrorCode.ACCOUNT_SUSPENDED
+            )
 
         if MASTER_OTP and otp == MASTER_OTP:
             pass
         elif user.get("otp") != otp:
-            return {"error": "Invalid OTP", "status": 400}
+            raise ValidationError(
+                message="Invalid OTP",
+                code=ErrorCode.INVALID_OTP
+            )
         elif user.get("otp_expires_at") and datetime.utcnow() > user["otp_expires_at"]:
-            return {"error": "OTP has expired", "status": 400}
+            raise ValidationError(
+                message="OTP has expired",
+                code=ErrorCode.OTP_EXPIRED
+            )
 
         # Update password and activate if pending (OTP verifies email)
         update_fields = {
@@ -411,16 +471,19 @@ class AuthService:
 
         # Don't allow OTP resend for suspended users
         if user.get("status") == "suspended":
-            return {"error": "Your account has been suspended", "status": 403}
+            raise AuthorizationError(
+                message="Your account has been suspended",
+                code=ErrorCode.ACCOUNT_SUSPENDED
+            )
 
         # Check cooldown
         remaining = check_otp_cooldown(user)
         if remaining:
-            return {
-                "error": f"Please wait {remaining} seconds before requesting another code.",
-                "status": 429,
-                "retry_after": remaining
-            }
+            raise RateLimitError(
+                message=f"Please wait {remaining} seconds before requesting another code.",
+                retry_after=remaining,
+                code=ErrorCode.OTP_COOLDOWN
+            )
 
         otp = generate_otp()
         now = datetime.utcnow()
@@ -445,27 +508,39 @@ class AuthService:
         # Validate email domain (checks both basic and custom blocklists)
         validation = await validate_email_for_auth_async(email)
         if not validation.is_valid:
-            return {"error": validation.error_message, "status": 400}
+            raise ValidationError(
+                message=validation.error_message,
+                code=ErrorCode.INVALID_EMAIL_DOMAIN
+            )
 
         user = await self.db.users.find_one({"email": email.lower()})
 
         if not user:
-            return {"error": "We couldn't find an account with that email.", "status": 404}
+            raise NotFoundError(
+                message="We couldn't find an account with that email.",
+                code=ErrorCode.USER_NOT_FOUND
+            )
 
         if user.get("status") == "suspended":
-            return {"error": "Your account has been suspended", "status": 403}
+            raise AuthorizationError(
+                message="Your account has been suspended",
+                code=ErrorCode.ACCOUNT_SUSPENDED
+            )
 
         if user.get("status") == "pending":
-            return {"error": "Please verify your account first", "status": 403}
+            raise AuthorizationError(
+                message="Please verify your account first",
+                code=ErrorCode.ACCOUNT_PENDING
+            )
 
         # Check cooldown
         remaining = check_otp_cooldown(user)
         if remaining:
-            return {
-                "error": f"Please wait {remaining} seconds before requesting another code.",
-                "status": 429,
-                "retry_after": remaining
-            }
+            raise RateLimitError(
+                message=f"Please wait {remaining} seconds before requesting another code.",
+                retry_after=remaining,
+                code=ErrorCode.OTP_COOLDOWN
+            )
 
         otp = generate_otp()
         now = datetime.utcnow()
@@ -489,21 +564,36 @@ class AuthService:
         user = await self.db.users.find_one({"email": email.lower()})
 
         if not user:
-            return {"error": "Invalid email or OTP", "status": 401}
+            raise AuthenticationError(
+                message="Invalid email or OTP",
+                code=ErrorCode.INVALID_CREDENTIALS
+            )
 
         if user.get("status") == "suspended":
-            return {"error": "Your account has been suspended", "status": 403}
+            raise AuthorizationError(
+                message="Your account has been suspended",
+                code=ErrorCode.ACCOUNT_SUSPENDED
+            )
 
         if user.get("status") == "pending":
-            return {"error": "Please verify your account first", "status": 403}
+            raise AuthorizationError(
+                message="Please verify your account first",
+                code=ErrorCode.ACCOUNT_PENDING
+            )
 
         # Check master OTP or regular OTP
         if MASTER_OTP and otp == MASTER_OTP:
             pass
         elif user.get("otp") != otp:
-            return {"error": "Invalid email or OTP", "status": 401}
+            raise AuthenticationError(
+                message="Invalid email or OTP",
+                code=ErrorCode.INVALID_OTP
+            )
         elif user.get("otp_expires_at") and datetime.utcnow() > user["otp_expires_at"]:
-            return {"error": "OTP has expired", "status": 400}
+            raise ValidationError(
+                message="OTP has expired",
+                code=ErrorCode.OTP_EXPIRED
+            )
 
         # Clear OTP and update login
         await self.db.users.update_one(

@@ -1,6 +1,7 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   UserPlus,
   Mail,
@@ -14,27 +15,50 @@ import {
   Check,
 } from 'lucide-react';
 import { createUser } from '../../lib/api';
-import { validateEmail, validatePassword } from '../../lib/validation';
+import { createUserSchema, type CreateUserFormData } from '../../lib/schemas';
+import { getErrorMessage } from '../../lib/api-error';
 import { Button } from '../../components/ui/Button';
+import { Input } from '../../components/ui/Input';
+import { Select } from '../../components/ui/Select';
 import { PageLayout } from '../../components/layout/PageLayout';
 import type { CreateUserRequest } from '../../types';
+
+const roleOptions = [
+  { value: 'viewer', label: 'Viewer' },
+  { value: 'editor', label: 'Editor' },
+  { value: 'admin', label: 'Admin' },
+  { value: 'super_admin', label: 'Super Admin' },
+];
+
+const statusOptions = [
+  { value: 'active', label: 'Active' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'suspended', label: 'Suspended' },
+];
 
 export function CreateUserPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  // Form state
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [department, setDepartment] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [role, setRole] = useState<'super_admin' | 'admin' | 'editor' | 'viewer'>('viewer');
-  const [status, setStatus] = useState<string>('active');
-
-  // Error state
-  const [error, setError] = useState<string | null>(null);
+  // React Hook Form with Zod validation
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setError,
+  } = useForm<CreateUserFormData>({
+    resolver: zodResolver(createUserSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      first_name: '',
+      last_name: '',
+      department: '',
+      phone_number: '',
+      role: 'viewer',
+      status: 'active',
+    },
+  });
 
   // Create user mutation
   const createMutation = useMutation({
@@ -46,39 +70,22 @@ export function CreateUserPage() {
       queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
       navigate('/admin/users');
     },
-    onError: (err: Error & { response?: { data?: { detail?: string } } }) => {
-      setError(err.response?.data?.detail || err.message || 'Failed to create user');
+    onError: (err: unknown) => {
+      setError('root', { message: getErrorMessage(err) });
     },
   });
 
   // Submit form
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    // Validate email
-    const emailValidation = validateEmail(email);
-    if (!emailValidation.isValid) {
-      setError(emailValidation.errors[0]);
-      return;
-    }
-
-    // Validate password
-    const passwordValidation = validatePassword(password);
-    if (!passwordValidation.isValid) {
-      setError(passwordValidation.errors[0]);
-      return;
-    }
-
+  const onSubmit = (data: CreateUserFormData) => {
     const userData: CreateUserRequest = {
-      email: email.trim(),
-      password,
-      first_name: firstName.trim() || undefined,
-      last_name: lastName.trim() || undefined,
-      department: department.trim() || undefined,
-      phone_number: phoneNumber.trim() || undefined,
-      role,
-      status,
+      email: data.email.trim(),
+      password: data.password,
+      first_name: data.first_name?.trim() || undefined,
+      last_name: data.last_name?.trim() || undefined,
+      department: data.department?.trim() || undefined,
+      phone_number: data.phone_number?.trim() || undefined,
+      role: data.role,
+      status: data.status,
     };
 
     createMutation.mutate(userData);
@@ -93,17 +100,17 @@ export function CreateUserPage() {
       maxWidth="2xl"
     >
       {/* Error Alert */}
-      {error && (
+      {errors.root && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
           <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
-          <p className="text-red-700">{error}</p>
-          <button onClick={() => setError(null)} className="ml-auto">
+          <p className="text-red-700">{errors.root.message}</p>
+          <button onClick={() => setError('root', {})} className="ml-auto">
             <X className="w-4 h-4 text-red-600" />
           </button>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Account Details */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
@@ -111,35 +118,22 @@ export function CreateUserPage() {
             Account Details
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="user@example.com"
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                required
+            <Input
+              label="Email"
+              type="email"
+              placeholder="user@example.com"
+              error={errors.email?.message}
+              {...register('email')}
+            />
+            <div className="relative">
+              <Input
+                label="Password"
+                type="password"
+                placeholder="Min 8 characters"
+                error={errors.password?.message}
+                {...register('password')}
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Password <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Min 8 characters"
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  minLength={8}
-                  required
-                />
-                <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              </div>
+              <Lock className="absolute right-3 top-[38px] w-4 h-4 text-gray-400" />
             </div>
           </div>
         </div>
@@ -151,51 +145,39 @@ export function CreateUserPage() {
             Profile Details
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-              <input
+            <Input
+              label="First Name"
+              type="text"
+              placeholder="John"
+              error={errors.first_name?.message}
+              {...register('first_name')}
+            />
+            <Input
+              label="Last Name"
+              type="text"
+              placeholder="Doe"
+              error={errors.last_name?.message}
+              {...register('last_name')}
+            />
+            <div className="relative">
+              <Input
+                label="Department"
                 type="text"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                placeholder="John"
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="Engineering"
+                error={errors.department?.message}
+                {...register('department')}
               />
+              <Briefcase className="absolute right-3 top-[38px] w-4 h-4 text-gray-400" />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-              <input
-                type="text"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                placeholder="Doe"
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            <div className="relative">
+              <Input
+                label="Phone Number"
+                type="tel"
+                placeholder="+1 234 567 8900"
+                error={errors.phone_number?.message}
+                {...register('phone_number')}
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={department}
-                  onChange={(e) => setDepartment(e.target.value)}
-                  placeholder="Engineering"
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-                <Briefcase className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-              <div className="relative">
-                <input
-                  type="tel"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  placeholder="+1 234 567 8900"
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-                <Phone className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              </div>
+              <Phone className="absolute right-3 top-[38px] w-4 h-4 text-gray-400" />
             </div>
           </div>
         </div>
@@ -207,31 +189,18 @@ export function CreateUserPage() {
             Role & Status
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value as typeof role)}
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
-              >
-                <option value="viewer">Viewer</option>
-                <option value="editor">Editor</option>
-                <option value="admin">Admin</option>
-                <option value="super_admin">Super Admin</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
-              >
-                <option value="active">Active</option>
-                <option value="pending">Pending</option>
-                <option value="suspended">Suspended</option>
-              </select>
-            </div>
+            <Select
+              label="Role"
+              options={roleOptions}
+              error={errors.role?.message}
+              {...register('role')}
+            />
+            <Select
+              label="Status"
+              options={statusOptions}
+              error={errors.status?.message}
+              {...register('status')}
+            />
           </div>
         </div>
 

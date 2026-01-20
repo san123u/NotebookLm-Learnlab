@@ -59,10 +59,7 @@ async def get_user(
 ):
     """Get a single user by ID."""
     service = AdminService(db)
-    user = await service.get_user(user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
+    return await service.get_user(user_id)
 
 
 @router.post("/users", response_model=UserResponse, status_code=201)
@@ -73,10 +70,7 @@ async def create_user(
 ):
     """Create a new user (bypass normal signup flow)."""
     service = AdminService(db)
-    try:
-        return await service.create_user(data, str(current_user.id))
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    return await service.create_user(data, str(current_user.id))
 
 
 @router.put("/users/{user_id}", response_model=UserResponse)
@@ -95,10 +89,7 @@ async def update_user(
             raise HTTPException(status_code=400, detail="Cannot remove your own super_admin role")
 
     service = AdminService(db)
-    user = await service.update_user(user_id, data, str(current_user.id))
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
+    return await service.update_user(user_id, data, str(current_user.id))
 
 
 @router.delete("/users/{user_id}", status_code=204)
@@ -112,7 +103,5 @@ async def delete_user(
         raise HTTPException(status_code=400, detail="Cannot delete yourself")
 
     service = AdminService(db)
-    success = await service.delete_user(user_id)
-    if not success:
-        raise HTTPException(status_code=404, detail="User not found")
+    await service.delete_user(user_id)
     return None

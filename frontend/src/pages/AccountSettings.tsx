@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   User,
   Lock,
@@ -21,8 +23,11 @@ import {
   updateAccountProfile,
   changePassword,
 } from '../lib/api';
+import { profileSchema, changePasswordSchema, type ProfileFormData, type ChangePasswordFormData } from '../lib/schemas';
 import { validatePassword } from '../lib/validation';
+import { getErrorMessage } from '../lib/api-error';
 import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
 import { PageLayout } from '../components/layout/PageLayout';
 
 type TabType = 'profile' | 'security';
@@ -31,13 +36,6 @@ const tabs: { id: TabType; name: string; icon: React.ElementType }[] = [
   { id: 'profile', name: 'Profile', icon: User },
   { id: 'security', name: 'Security', icon: Lock },
 ];
-
-interface UpdateProfileParams {
-  first_name?: string;
-  last_name?: string;
-  department?: string;
-  phone_number?: string;
-}
 
 export function AccountSettings() {
   const [activeTab, setActiveTab] = useState<TabType>('profile');
@@ -86,7 +84,6 @@ export function AccountSettings() {
 function ProfileTab() {
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState<UpdateProfileParams>({});
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const { data: profile, isLoading } = useQuery({
@@ -94,16 +91,33 @@ function ProfileTab() {
     queryFn: getAccountProfile,
   });
 
+  // React Hook Form with Zod validation
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setError,
+    reset,
+  } = useForm<ProfileFormData>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      first_name: '',
+      last_name: '',
+      department: '',
+      phone_number: '',
+    },
+  });
+
   useEffect(() => {
     if (profile) {
-      setFormData({
+      reset({
         first_name: profile.first_name || '',
         last_name: profile.last_name || '',
         department: profile.department || '',
         phone_number: profile.phone_number || '',
       });
     }
-  }, [profile]);
+  }, [profile, reset]);
 
   const { updateUser } = useAuth();
 
@@ -122,16 +136,19 @@ function ProfileTab() {
         department: updatedProfile.department,
       });
     },
+    onError: (err: unknown) => {
+      setError('root', { message: getErrorMessage(err) });
+    },
   });
 
-  const handleSave = () => {
-    updateMutation.mutate(formData);
+  const onSubmit = (data: ProfileFormData) => {
+    updateMutation.mutate(data);
   };
 
   const handleCancel = () => {
     setIsEditing(false);
     if (profile) {
-      setFormData({
+      reset({
         first_name: profile.first_name || '',
         last_name: profile.last_name || '',
         department: profile.department || '',
@@ -168,10 +185,10 @@ function ProfileTab() {
       )}
 
       {/* Error Message */}
-      {updateMutation.isError && (
+      {errors.root && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
           <AlertCircle className="w-5 h-5 text-red-600" />
-          <span className="text-red-700">Failed to update profile. Please try again.</span>
+          <span className="text-red-700">{errors.root.message}</span>
         </div>
       )}
 
@@ -201,7 +218,7 @@ function ProfileTab() {
               </Button>
               <Button
                 variant="primary"
-                onClick={handleSave}
+                onClick={handleSubmit(onSubmit)}
                 loading={updateMutation.isPending}
                 leftIcon={!updateMutation.isPending ? <Save className="w-4 h-4" /> : undefined}
               >
@@ -213,68 +230,73 @@ function ProfileTab() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
             {isEditing ? (
-              <input
-                type="text"
-                value={formData.first_name || ''}
-                onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              <Input
+                label="First Name"
                 placeholder="Enter first name"
+                error={errors.first_name?.message}
+                {...register('first_name')}
               />
             ) : (
-              <p className="text-gray-900 py-2.5">{profile?.first_name || '—'}</p>
+              <>
+                <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                <p className="text-gray-900 py-2.5">{profile?.first_name || '—'}</p>
+              </>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
             {isEditing ? (
-              <input
-                type="text"
-                value={formData.last_name || ''}
-                onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              <Input
+                label="Last Name"
                 placeholder="Enter last name"
+                error={errors.last_name?.message}
+                {...register('last_name')}
               />
             ) : (
-              <p className="text-gray-900 py-2.5">{profile?.last_name || '—'}</p>
+              <>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                <p className="text-gray-900 py-2.5">{profile?.last_name || '—'}</p>
+              </>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              <Building2 className="w-4 h-4 inline mr-1" />
-              Department
-            </label>
             {isEditing ? (
-              <input
-                type="text"
-                value={formData.department || ''}
-                onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              <Input
+                label="Department"
                 placeholder="Enter department"
+                error={errors.department?.message}
+                {...register('department')}
               />
             ) : (
-              <p className="text-gray-900 py-2.5">{profile?.department || '—'}</p>
+              <>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <Building2 className="w-4 h-4 inline mr-1" />
+                  Department
+                </label>
+                <p className="text-gray-900 py-2.5">{profile?.department || '—'}</p>
+              </>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              <Phone className="w-4 h-4 inline mr-1" />
-              Phone Number
-            </label>
             {isEditing ? (
-              <input
+              <Input
+                label="Phone Number"
                 type="tel"
-                value={formData.phone_number || ''}
-                onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 placeholder="Enter phone number"
+                error={errors.phone_number?.message}
+                {...register('phone_number')}
               />
             ) : (
-              <p className="text-gray-900 py-2.5">{profile?.phone_number || '—'}</p>
+              <>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <Phone className="w-4 h-4 inline mr-1" />
+                  Phone Number
+                </label>
+                <p className="text-gray-900 py-2.5">{profile?.phone_number || '—'}</p>
+              </>
             )}
           </div>
         </div>
@@ -329,18 +351,33 @@ function PasswordCheck({ passed, label }: { passed: boolean; label: string }) {
 function SecurityTab() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPasswordRules, setShowPasswordRules] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Password validation
-  const passwordValidation = validatePassword(newPassword);
+  // React Hook Form with Zod validation
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setError,
+    reset,
+    watch,
+  } = useForm<ChangePasswordFormData>({
+    resolver: zodResolver(changePasswordSchema),
+    defaultValues: {
+      new_password: '',
+      confirm_password: '',
+    },
+  });
+
+  const newPassword = watch('new_password');
+
+  // Password validation for requirements display
+  const passwordValidation = validatePassword(newPassword || '');
 
   // Show rules when user starts typing
   useEffect(() => {
-    if (newPassword.length > 0) {
+    if (newPassword && newPassword.length > 0) {
       setShowPasswordRules(true);
     } else {
       setShowPasswordRules(false);
@@ -351,33 +388,18 @@ function SecurityTab() {
     mutationFn: (params: { new_password: string }) => changePassword(params.new_password),
     onSuccess: () => {
       setSuccessMessage('Password changed successfully');
-      setNewPassword('');
-      setConfirmPassword('');
+      reset();
       setShowPasswordRules(false);
-      setErrorMessage(null);
       setTimeout(() => setSuccessMessage(null), 5000);
     },
-    onError: (error: Error & { response?: { data?: { detail?: string } } }) => {
-      setErrorMessage(error?.response?.data?.detail || 'Failed to change password');
+    onError: (error: unknown) => {
+      setError('root', { message: getErrorMessage(error) });
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMessage(null);
-
-    if (!passwordValidation.isValid) {
-      setErrorMessage('Password does not meet requirements');
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      setErrorMessage('Passwords do not match');
-      return;
-    }
-
+  const onSubmit = (data: ChangePasswordFormData) => {
     changeMutation.mutate({
-      new_password: newPassword,
+      new_password: data.new_password,
     });
   };
 
@@ -392,10 +414,10 @@ function SecurityTab() {
       )}
 
       {/* Error Message */}
-      {errorMessage && (
+      {errors.root && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
           <AlertCircle className="w-5 h-5 text-red-600" />
-          <span className="text-red-700">{errorMessage}</span>
+          <span className="text-red-700">{errors.root.message}</span>
         </div>
       )}
 
@@ -406,20 +428,17 @@ function SecurityTab() {
           Change Password
         </h2>
 
-        <form onSubmit={handleSubmit} className="max-w-md space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="max-w-md space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               New Password
             </label>
             <div className="relative">
-              <input
+              <Input
                 type={showNewPassword ? 'text' : 'password'}
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full px-4 py-2.5 pr-10 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 placeholder="Enter new password"
-                required
-                minLength={8}
+                error={errors.new_password?.message}
+                {...register('new_password')}
               />
               <button
                 type="button"
@@ -450,13 +469,11 @@ function SecurityTab() {
               Confirm Password
             </label>
             <div className="relative">
-              <input
+              <Input
                 type={showConfirmPassword ? 'text' : 'password'}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-2.5 pr-10 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 placeholder="Confirm new password"
-                required
+                error={errors.confirm_password?.message}
+                {...register('confirm_password')}
               />
               <button
                 type="button"
@@ -471,7 +488,6 @@ function SecurityTab() {
           <Button
             type="submit"
             variant="primary"
-            disabled={!passwordValidation.isValid || !confirmPassword || newPassword !== confirmPassword}
             loading={changeMutation.isPending}
             className="w-full"
           >

@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 
 from app.core.config import settings
+from app.core.exceptions import register_exception_handlers
 from app.api.api import api_router
 from app.db import connect_to_mongo, close_mongo_connection, get_database
 from app.odm.document import Document
@@ -58,6 +59,9 @@ app = FastAPI(
     redoc_url="/api/redoc",
     openapi_url="/api/openapi.json",
 )
+
+# Register custom exception handlers
+register_exception_handlers(app)
 
 # CORS middleware
 app.add_middleware(
