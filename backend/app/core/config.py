@@ -57,7 +57,7 @@ class Settings(BaseSettings):
     # ==========================================================================
     # Frontend URL - For links in emails
     # ==========================================================================
-    APP_BASE_URL: str = "http://localhost:3700"
+    APP_BASE_URL: str = "http://localhost:3100"
 
     @property
     def cors_origins_list(self) -> list[str]:

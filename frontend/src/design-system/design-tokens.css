@@ -1,37 +1,59 @@
 /**
- * Design Tokens
+ * Design Tokens - SAIL Starter Kit
  *
  * This file defines the core design tokens for the application.
  * These values are used by Tailwind CSS and custom components.
  *
- * The primary color is set during project initialization via init-project.py.
- * To change the primary color, modify the --color-app-primary-* variables below.
+ * Primary Color: Sky Blue (#0284c7) - Modern, trustworthy, tech-forward
+ * Secondary Color: Slate - Professional, balanced, accessible
  */
 
 @theme {
   /* ============================================
-     APP PRIMARY COLOR
+     APP PRIMARY COLOR - Sky Blue
      ============================================
-     This is the main brand color for your app.
-     Change these values to customize your app's look.
-     The init-project.py script will update these based on your choice.
+     Main brand color conveying innovation and trust.
   */
-  --color-app-primary-50: var(--color-indigo-50);
-  --color-app-primary-100: var(--color-indigo-100);
-  --color-app-primary-200: var(--color-indigo-200);
-  --color-app-primary-300: var(--color-indigo-300);
-  --color-app-primary-400: var(--color-indigo-400);
-  --color-app-primary-500: var(--color-indigo-500);
-  --color-app-primary-600: var(--color-indigo-600);
-  --color-app-primary-700: var(--color-indigo-700);
-  --color-app-primary-800: var(--color-indigo-800);
-  --color-app-primary-900: var(--color-indigo-900);
+  --color-app-primary-50: #f0f9ff;
+  --color-app-primary-100: #e0f2fe;
+  --color-app-primary-200: #bae6fd;
+  --color-app-primary-300: #7dd3fc;
+  --color-app-primary-400: #38bdf8;
+  --color-app-primary-500: #0ea5e9;
+  --color-app-primary-600: #0284c7;
+  --color-app-primary-700: #0369a1;
+  --color-app-primary-800: #075985;
+  --color-app-primary-900: #0c4a6e;
+  --color-app-primary-950: #082f49;
 
   /* Main app primary color (used in components) */
-  --color-app-primary: var(--color-indigo-600);
-  --color-app-primary-hover: var(--color-indigo-700);
-  --color-app-primary-light: var(--color-indigo-100);
-  --color-app-primary-dark: var(--color-indigo-800);
+  --color-app-primary: #0284c7;
+  --color-app-primary-hover: #0369a1;
+  --color-app-primary-light: #e0f2fe;
+  --color-app-primary-dark: #075985;
+
+  /* ============================================
+     APP SECONDARY COLOR - Slate
+     ============================================
+     Neutral color for text, borders, backgrounds.
+  */
+  --color-app-secondary-50: #f8fafc;
+  --color-app-secondary-100: #f1f5f9;
+  --color-app-secondary-200: #e2e8f0;
+  --color-app-secondary-300: #cbd5e1;
+  --color-app-secondary-400: #94a3b8;
+  --color-app-secondary-500: #64748b;
+  --color-app-secondary-600: #475569;
+  --color-app-secondary-700: #334155;
+  --color-app-secondary-800: #1e293b;
+  --color-app-secondary-900: #0f172a;
+  --color-app-secondary-950: #020617;
+
+  /* Main app secondary color */
+  --color-app-secondary: #475569;
+  --color-app-secondary-hover: #334155;
+  --color-app-secondary-light: #f1f5f9;
+  --color-app-secondary-dark: #1e293b;
 
   /* ============================================
      SEMANTIC COLORS
@@ -40,24 +62,24 @@
   */
 
   /* Success */
-  --color-app-success: var(--color-green-500);
-  --color-app-success-light: var(--color-green-100);
-  --color-app-success-dark: var(--color-green-700);
+  --color-app-success: #10b981;
+  --color-app-success-light: #d1fae5;
+  --color-app-success-dark: #047857;
 
   /* Warning */
-  --color-app-warning: var(--color-amber-500);
-  --color-app-warning-light: var(--color-amber-100);
-  --color-app-warning-dark: var(--color-amber-700);
+  --color-app-warning: #f59e0b;
+  --color-app-warning-light: #fef3c7;
+  --color-app-warning-dark: #b45309;
 
   /* Danger/Error */
-  --color-app-danger: var(--color-red-500);
-  --color-app-danger-light: var(--color-red-100);
-  --color-app-danger-dark: var(--color-red-700);
+  --color-app-danger: #ef4444;
+  --color-app-danger-light: #fee2e2;
+  --color-app-danger-dark: #b91c1c;
 
   /* Info */
-  --color-app-info: var(--color-blue-500);
-  --color-app-info-light: var(--color-blue-100);
-  --color-app-info-dark: var(--color-blue-700);
+  --color-app-info: #3b82f6;
+  --color-app-info-light: #dbeafe;
+  --color-app-info-dark: #1d4ed8;
 
   /* ============================================
      TYPOGRAPHY
@@ -133,29 +155,58 @@
   --btn-primary-text: white;
   --btn-border-radius: var(--radius-app-lg);
 
+  /* Secondary Button */
+  --btn-secondary-bg: var(--color-app-secondary);
+  --btn-secondary-hover: var(--color-app-secondary-hover);
+  --btn-secondary-text: white;
+
   /* Input */
-  --input-border: var(--color-slate-300);
+  --input-border: var(--color-app-secondary-300);
   --input-border-focus: var(--color-app-primary);
-  --input-ring-focus: var(--color-app-primary);
+  --input-ring-focus: var(--color-app-primary-300);
   --input-border-radius: var(--radius-app-md);
+  --input-bg: white;
 
   /* Card */
   --card-bg: white;
-  --card-border: var(--color-slate-100);
+  --card-border: var(--color-app-secondary-100);
   --card-border-radius: var(--radius-app-xl);
   --card-shadow: var(--shadow-app-sm);
+
+  /* Sidebar */
+  --sidebar-bg: var(--color-app-secondary-900);
+  --sidebar-text: var(--color-app-secondary-300);
+  --sidebar-text-active: white;
+  --sidebar-accent: var(--color-app-primary);
+
+  /* Header */
+  --header-bg: white;
+  --header-border: var(--color-app-secondary-200);
 }
 
 .dark {
   /* Button (dark mode) */
-  --btn-primary-bg: var(--color-app-primary);
-  --btn-primary-hover: var(--color-app-primary-600);
+  --btn-primary-bg: var(--color-app-primary-500);
+  --btn-primary-hover: var(--color-app-primary-400);
+
+  /* Secondary Button (dark mode) */
+  --btn-secondary-bg: var(--color-app-secondary-600);
+  --btn-secondary-hover: var(--color-app-secondary-500);
 
   /* Input (dark mode) */
-  --input-border: var(--color-slate-600);
-  --input-border-focus: var(--color-app-primary);
+  --input-border: var(--color-app-secondary-600);
+  --input-border-focus: var(--color-app-primary-500);
+  --input-ring-focus: var(--color-app-primary-800);
+  --input-bg: var(--color-app-secondary-800);
 
   /* Card (dark mode) */
-  --card-bg: var(--color-slate-800);
-  --card-border: var(--color-slate-700);
+  --card-bg: var(--color-app-secondary-800);
+  --card-border: var(--color-app-secondary-700);
+
+  /* Sidebar (dark mode) */
+  --sidebar-bg: var(--color-app-secondary-950);
+
+  /* Header (dark mode) */
+  --header-bg: var(--color-app-secondary-900);
+  --header-border: var(--color-app-secondary-700);
 }

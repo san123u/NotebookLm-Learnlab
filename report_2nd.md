@@ -336,7 +336,7 @@ A comprehensive showcase page demonstrating all UI components with interactive e
 
 **Access:**
 ```
-http://localhost:3700/design-system
+http://localhost:3100/design-system
 ```
 
 ---
@@ -507,8 +507,8 @@ docker compose up --build
 
 ### Access the App
 
-- **Frontend:** http://localhost:3700
-- **API Docs:** http://localhost:3700/api/docs
+- **Frontend:** http://localhost:3100
+- **API Docs:** http://localhost:3100/api/docs
 
 ### Login
 

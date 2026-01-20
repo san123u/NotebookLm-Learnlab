@@ -8,9 +8,9 @@
 #   docker compose down -v        # Stop + remove volumes
 #
 # Ports:
-#   3700  - Frontend (nginx)
+#   3100  - Frontend (nginx)
 #   8000  - Backend API (internal)
-#   27100 - MongoDB
+#   27017 - MongoDB
 
 services:
   # ============================================
@@ -21,7 +21,7 @@ services:
     image: mongo:7.0.14
     container_name: app-mongo
     ports:
-      - "27100:27017"
+      - "27017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-app_admin}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-app_secure_pass}
@@ -76,7 +76,7 @@ services:
       dockerfile: Dockerfile
     container_name: app-frontend
     ports:
-      - "3700:80"
+      - "3100:80"
     depends_on:
       - app-backend
     restart: unless-stopped

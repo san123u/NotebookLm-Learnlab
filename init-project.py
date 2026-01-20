@@ -467,7 +467,7 @@ Project initialized successfully!
      {Colors.CYAN}docker compose up --build{Colors.RESET}
 
   3. Access your app:
-     {Colors.CYAN}http://localhost:3700{Colors.RESET}
+     {Colors.CYAN}http://localhost:3100{Colors.RESET}
 
   4. Login with admin credentials from .env:
      - Email: ADMIN_EMAIL

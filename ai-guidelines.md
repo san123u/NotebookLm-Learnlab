@@ -95,8 +95,8 @@ frontend/
 
 - Run `docker compose up -d` to start all services
 - Run `docker compose up --build` to rebuild after code changes
-- Access frontend at http://localhost:3700
-- MongoDB is exposed at localhost:27100
+- Access frontend at http://localhost:3100
+- MongoDB is exposed at localhost:27017
 - Use `docker compose logs -f <service>` to view logs
 
 ## Environment Variables

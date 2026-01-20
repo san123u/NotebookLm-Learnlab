@@ -340,7 +340,7 @@ ${BOLD}Next steps:${NC}
      ${CYAN}docker compose up --build${NC}
 
   3. Access your app:
-     ${CYAN}http://localhost:3700${NC}
+     ${CYAN}http://localhost:3100${NC}
 
   4. Login with admin credentials from .env:
      - Email: ADMIN_EMAIL

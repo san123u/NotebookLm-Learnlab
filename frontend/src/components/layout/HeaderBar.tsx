@@ -107,40 +107,40 @@ export function HeaderBar() {
     : user?.email?.charAt(0).toUpperCase() || 'U';
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+    <header className="bg-white border-b border-gray-100 sticky top-0 z-10">
       <div className="flex items-center justify-between h-14 px-6">
         {/* Breadcrumbs */}
         <nav className="flex items-center space-x-1 text-sm">
           <Link
             to="/dashboard"
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-[var(--btn-primary-bg)] transition-colors p-1 rounded-md hover:bg-gray-50"
           >
             <Home className="w-4 h-4" />
           </Link>
           {breadcrumbs.map((crumb, index) => (
             <div key={index} className="flex items-center">
-              <ChevronRight className="w-4 h-4 text-gray-300 mx-1" />
+              <ChevronRight className="w-4 h-4 text-gray-300 mx-0.5" />
               {crumb.href && index < breadcrumbs.length - 1 ? (
                 <Link
                   to={crumb.href}
-                  className="text-gray-500 hover:text-gray-700 transition-colors"
+                  className="text-gray-500 hover:text-[var(--btn-primary-bg)] transition-colors px-1.5 py-0.5 rounded-md hover:bg-gray-50"
                 >
                   {crumb.label}
                 </Link>
               ) : (
-                <span className="text-gray-900 font-medium">{crumb.label}</span>
+                <span className="text-gray-900 font-medium px-1.5 py-0.5">{crumb.label}</span>
               )}
             </div>
           ))}
         </nav>
 
         {/* Right side: Admin Switch + Profile */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {/* Admin View Switcher - Only for super_admin */}
           {isSuperAdmin && (
             <Link
               to="/admin"
-              className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-purple-600 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors"
+              className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-purple-600 bg-purple-50 hover:bg-purple-100 rounded-lg transition-all duration-200"
             >
               <ShieldCheck className="w-4 h-4" />
               <span className="hidden sm:inline">Admin</span>
@@ -154,19 +154,19 @@ export function HeaderBar() {
               size="sm"
               onClick={() => setDropdownOpen(!dropdownOpen)}
               className={cn(
-                'flex items-center gap-2 px-3 py-1.5',
-                dropdownOpen ? 'bg-gray-100' : ''
+                'flex items-center gap-2 px-2 py-1.5 rounded-lg transition-all duration-200',
+                dropdownOpen ? 'bg-gray-100' : 'hover:bg-gray-50'
               )}
             >
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--btn-primary-bg)] to-[var(--btn-primary-hover)] flex items-center justify-center">
-                <span className="text-white text-sm font-semibold">{initials}</span>
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--btn-primary-bg)] to-sky-400 flex items-center justify-center ring-2 ring-white shadow-sm">
+                <span className="text-white text-xs font-semibold">{initials}</span>
               </div>
-              <span className="text-sm font-medium text-gray-700 hidden sm:block">
+              <span className="text-sm font-medium text-gray-700 hidden sm:block max-w-[120px] truncate">
                 {displayName}
               </span>
               <ChevronDown
                 className={cn(
-                  'w-4 h-4 text-gray-400 transition-transform hidden sm:block',
+                  'w-4 h-4 text-gray-400 transition-transform duration-200 hidden sm:block',
                   dropdownOpen && 'rotate-180'
                 )}
               />
@@ -174,24 +174,24 @@ export function HeaderBar() {
 
             {/* Dropdown Menu */}
             {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
+              <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                 {/* User Info */}
                 <div className="px-4 py-3 border-b border-gray-100">
-                  <p className="text-sm font-medium text-gray-900">{displayName}</p>
-                  <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                  <p className="text-sm font-semibold text-gray-900">{displayName}</p>
+                  <p className="text-xs text-gray-500 truncate mt-0.5">{user?.email}</p>
                   {user?.role && (
-                    <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium bg-[var(--color-app-primary-100)] text-[var(--color-app-primary-700)] rounded-full capitalize">
+                    <span className="inline-flex items-center mt-2 px-2 py-0.5 text-xs font-medium bg-sky-50 text-sky-700 rounded-full capitalize">
                       {user.role.replace('_', ' ')}
                     </span>
                   )}
                 </div>
 
                 {/* Menu Items */}
-                <div className="py-1">
+                <div className="py-1.5">
                   <Link
                     to="/dashboard/my-profile"
                     onClick={() => setDropdownOpen(false)}
-                    className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                   >
                     <User className="w-4 h-4 text-gray-400" />
                     My Profile
@@ -199,7 +199,7 @@ export function HeaderBar() {
                   <Link
                     to="/dashboard/account"
                     onClick={() => setDropdownOpen(false)}
-                    className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                   >
                     <Settings className="w-4 h-4 text-gray-400" />
                     Account Settings
@@ -207,12 +207,12 @@ export function HeaderBar() {
                 </div>
 
                 {/* Logout */}
-                <div className="border-t border-gray-100 pt-1">
+                <div className="border-t border-gray-100 pt-1.5">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={handleLogout}
-                    className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 justify-start"
+                    className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 justify-start rounded-none"
                   >
                     <LogOut className="w-4 h-4" />
                     Sign Out

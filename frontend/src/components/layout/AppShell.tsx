@@ -2,7 +2,7 @@
  * AppShell - Main application layout wrapper
  *
  * Provides the primary layout structure with:
- * - Collapsible sidebar
+ * - Collapsible sidebar with gradient background
  * - Header bar with breadcrumbs and user menu
  * - Main content area
  * - Footer
@@ -15,6 +15,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { HeaderBar } from './HeaderBar';
 import { useSystemConfig } from '../../hooks/useSystemConfig';
+import { cn } from '../../lib/utils';
 
 const SIDEBAR_COLLAPSED_KEY = 'sidebar-collapsed';
 
@@ -51,21 +52,29 @@ export function AppShell() {
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
+      {/* Sidebar */}
       <Sidebar
         collapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
       />
-      <div className="flex-1 flex flex-col overflow-hidden">
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Header with breadcrumbs and profile - hidden for chat routes */}
         {!isChatRoute && <HeaderBar />}
 
         {/* Main content area */}
-        <main className="flex-1 overflow-auto">
+        <main
+          className={cn(
+            'flex-1 overflow-auto',
+            !isChatRoute && 'bg-gradient-to-br from-gray-50 to-gray-100/50'
+          )}
+        >
           {isChatRoute ? (
             // No padding for chat - it handles its own layout
             <Outlet />
           ) : (
-            <div className="p-6">
+            <div className="p-6 max-w-[1600px] mx-auto w-full">
               <Outlet />
             </div>
           )}
@@ -73,10 +82,13 @@ export function AppShell() {
 
         {/* Footer - hidden for chat routes */}
         {!isChatRoute && (
-          <footer className="bg-white border-t border-gray-200 py-3 px-6">
-            <div className="flex items-center justify-between text-xs text-gray-400">
-              <span>&copy; {new Date().getFullYear()} {config.app.name}</span>
-              <span>{config.app.description}</span>
+          <footer className="bg-white border-t border-gray-100 py-3 px-6">
+            <div className="flex items-center justify-between text-xs text-gray-400 max-w-[1600px] mx-auto">
+              <span className="flex items-center gap-1.5">
+                <span>&copy; {new Date().getFullYear()}</span>
+                <span className="font-medium text-gray-500">{config.app.name}</span>
+              </span>
+              <span className="hidden sm:block">{config.app.description}</span>
             </div>
           </footer>
         )}

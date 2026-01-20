@@ -22,8 +22,8 @@ cp .env.example .env
 docker compose up -d --build
 
 # 4. Access the application
-# Frontend: http://localhost:3700
-# API Health: http://localhost:3700/api/health/
+# Frontend: http://localhost:3100
+# API Health: http://localhost:3100/api/health/
 
 # 5. Default Admin Login
 # Email: admin@example.com
@@ -414,13 +414,13 @@ ADMIN_EMAIL=admin@example.com
 ADMIN_PASSWORD=YourSecurePassword123!
 
 # CORS
-CORS_ORIGINS=["http://localhost:3700","http://localhost:5173"]
+CORS_ORIGINS=["http://localhost:3100","http://localhost:5173"]
 
 # Redis
 REDIS_URL=redis://app-redis:6379
 
 # Frontend URL
-APP_BASE_URL=http://localhost:3700
+APP_BASE_URL=http://localhost:3100
 
 # Email (optional - logs by default)
 EMAIL_ENABLED=false
@@ -437,10 +437,10 @@ DEBUG=false
 
 | Service | Image | Internal Port | External Port | Purpose |
 |---------|-------|---------------|---------------|---------|
-| app-mongo | mongo:7.0.14 | 27017 | 27100 | MongoDB database |
+| app-mongo | mongo:7.0.14 | 27017 | 27017 | MongoDB database |
 | app-redis | redis:7.4-alpine | 6379 | - | Cache/sessions |
 | app-backend | starter-kit-app-backend | 8000 | - | FastAPI API |
-| app-frontend | starter-kit-app-frontend | 80 | 3700 | Nginx + React |
+| app-frontend | starter-kit-app-frontend | 80 | 3100 | Nginx + React |
 
 ---
 

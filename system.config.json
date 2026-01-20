@@ -1,14 +1,19 @@
 {
   "app": {
-    "name": "Core Platform",
-    "slug": "core-platform",
-    "description": "Core Platform - Built with Core Platform Template",
+    "name": "SAIL Starter Kit",
+    "slug": "sail-starter-kit",
+    "description": "AI-Enabled App Generation Platform - Build fullstack applications with templates",
     "type": "saas-dashboard"
   },
   "theme": {
-    "primaryColor": "indigo"
+    "primaryColor": "sky",
+    "secondaryColor": "slate"
   },
   "layout": {
     "sidebarCollapsedByDefault": false
+  },
+  "branding": {
+    "logo": "/logo.svg",
+    "favicon": "/favicon.svg"
   }
 }

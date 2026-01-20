@@ -1,6 +1,6 @@
-# Core Platform Template
+# SAIL Starter Kit
 
-A production-ready fullstack platform template with authentication, user management, and multi-tenant support.
+AI-Enabled App Generation Platform - A production-ready fullstack template with authentication, user management, multi-tenant support, and automated app scaffolding.
 
 ## Stack
 
@@ -10,6 +10,8 @@ A production-ready fullstack platform template with authentication, user managem
 
 ## Features
 
+- **App Generation** - Scaffold new app modules from 8 templates via CLI
+- **Dynamic Navigation** - Generated apps automatically appear in sidebar
 - JWT Authentication with email verification
 - Password reset with OTP
 - Role-based access control (RBAC)
@@ -19,6 +21,7 @@ A production-ready fullstack platform template with authentication, user managem
 - Responsive UI with dark mode support
 - Modern collapsible sidebar with localStorage persistence
 - Design system with consistent UI components
+- Zod validation schemas synced with Pydantic
 
 ## Creating a new app
 
@@ -100,8 +103,8 @@ docker compose up --build
 
 ### 3. Access the Application
 
-- **Frontend**: http://localhost:3700
-- **API Docs**: http://localhost:3700/api/docs
+- **Frontend**: http://localhost:3100
+- **API Docs**: http://localhost:3100/api/docs
 
 ### 4. Login
 
