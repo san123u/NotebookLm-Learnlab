@@ -1,5 +1,5 @@
 """
-Core Platform API - Main Application
+SAIL Starter Kit API - Main Application
 
 FastAPI application with MongoDB backend.
 """
@@ -53,7 +53,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title=settings.APP_NAME,
-    description="Core Platform API with MongoDB Backend",
+    description="SAIL Starter Kit API with MongoDB Backend",
     version="1.0.0",
     lifespan=lifespan,
 )

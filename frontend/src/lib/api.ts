@@ -1,5 +1,5 @@
 /**
- * API client for the Core Platform.
+ * API client for SAIL Starter Kit.
  */
 
 import axios from 'axios';

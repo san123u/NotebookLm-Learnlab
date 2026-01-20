@@ -1,1 +1,1 @@
-# Core Platform Backend
+# SAIL Starter Kit Backend

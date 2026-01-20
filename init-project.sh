@@ -116,7 +116,7 @@ print_banner() {
     echo " ___/ / /_/ / _, _/ /___   / ____/ /___/ ___ |/ /  / __/  / /_/ / _, _// _, _/ ___ |"
     echo "/____/\\____/_/ |_/_____/  /_/   /_____/_/  |_/_/  /_/     \\____/_/ |_|/_/ |_/_/  |_|"
     echo -e "${NC}"
-    echo -e "${DIM}Create your personalized app from the Core Platform Template${NC}"
+    echo -e "${DIM}Create your personalized app from the SAIL Starter Kit Template${NC}"
     echo ""
 }
 
@@ -177,7 +177,7 @@ main() {
     done
 
     # App Description
-    DEFAULT_DESC="$APP_NAME - Built with Core Platform"
+    DEFAULT_DESC="$APP_NAME - Built with SAIL Starter Kit"
     read -p "${BOLD}App Description (one sentence)${NC} [${DIM}${DEFAULT_DESC}${NC}]: " APP_DESCRIPTION
     APP_DESCRIPTION=${APP_DESCRIPTION:-$DEFAULT_DESC}
 
@@ -260,7 +260,7 @@ EOF
         cp .env.example .env
 
         # Update .env values
-        replace_in_file ".env" 'APP_NAME="Core Platform"' "APP_NAME=\"$APP_NAME\""
+        replace_in_file ".env" 'APP_NAME="SAIL Starter Kit"' "APP_NAME=\"$APP_NAME\""
         replace_in_file ".env" 'JWT_SECRET=your-32-character-secret-key-here' "JWT_SECRET=$JWT_SECRET"
         replace_in_file ".env" 'MONGO_PASSWORD=app_secure_pass' "MONGO_PASSWORD=$MONGO_PASSWORD"
         replace_in_file ".env" "app_secure_pass@app-mongo" "$MONGO_PASSWORD@$APP_SLUG-mongo"
@@ -298,7 +298,7 @@ EOF
     echo "  Updating frontend..."
 
     if [[ -f "frontend/index.html" ]]; then
-        replace_in_file "frontend/index.html" "<title>Core Platform</title>" "<title>$APP_NAME</title>"
+        replace_in_file "frontend/index.html" "<title>SAIL Starter Kit</title>" "<title>$APP_NAME</title>"
         print_step "Updated frontend/index.html with app title"
     fi
 
@@ -320,7 +320,7 @@ EOF
     echo "  Updating documentation..."
 
     if [[ -f "README.md" ]]; then
-        replace_in_file "README.md" "# Core Platform Template" "# $APP_NAME"
+        replace_in_file "README.md" "# SAIL Starter Kit Template" "# $APP_NAME"
         replace_in_file "README.md" "core-platform" "$APP_SLUG"
         print_step "Updated README.md with project name"
     fi

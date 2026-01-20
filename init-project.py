@@ -154,7 +154,7 @@ def collect_app_info() -> dict:
  ___/ / /_/ / _, _/ /___   / ____/ /___/ ___ |/ /  / __/  / /_/ / _, _// _, _/ ___ |
 /____/\\____/_/ |_/_____/  /_/   /_____/_/  |_/_/  /_/     \\____/_/ |_|/_/ |_/_/  |_|
 {Colors.RESET}
-{Colors.DIM}Create your personalized app from the Core Platform Template{Colors.RESET}
+{Colors.DIM}Create your personalized app from the SAIL Starter Kit Template{Colors.RESET}
 """)
 
     print_header("App Information")
@@ -188,7 +188,7 @@ def collect_app_info() -> dict:
     # App Description
     app_description = prompt_input(
         "App Description (one sentence)",
-        default=f"{app_name} - Built with Core Platform"
+        default=f"{app_name} - Built with SAIL Starter Kit"
     )
 
     # App Type
@@ -279,7 +279,7 @@ def create_env_file(project_root: Path, config: dict) -> None:
     mongo_password = generate_secret_key(16)
 
     replacements = {
-        'APP_NAME="Core Platform"': f'APP_NAME="{config["app_name"]}"',
+        'APP_NAME="SAIL Starter Kit"': f'APP_NAME="{config["app_name"]}"',
         'JWT_SECRET=your-32-character-secret-key-here': f'JWT_SECRET={jwt_secret}',
         'MONGO_PASSWORD=app_secure_pass': f'MONGO_PASSWORD={mongo_password}',
         f'app_secure_pass@app-mongo': f'{mongo_password}@{slug}-mongo',
@@ -343,7 +343,7 @@ def update_frontend_index(project_root: Path, config: dict) -> None:
         return
 
     replacements = {
-        "<title>Core Platform</title>": f"<title>{config['app_name']}</title>",
+        "<title>SAIL Starter Kit</title>": f"<title>{config['app_name']}</title>",
     }
 
     if replace_in_file(index_html, replacements):
@@ -385,7 +385,7 @@ def update_readme(project_root: Path, config: dict) -> None:
         return
 
     replacements = {
-        "# Core Platform Template": f"# {config['app_name']}",
+        "# SAIL Starter Kit Template": f"# {config['app_name']}",
         "core-platform": config["app_slug"],
     }
 

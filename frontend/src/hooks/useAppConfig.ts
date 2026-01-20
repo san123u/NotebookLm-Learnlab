@@ -14,13 +14,13 @@ export interface AppConfig {
 
 const defaultConfig: AppConfig = {
   app: {
-    name: 'Core Platform',
-    slug: 'core-platform',
-    description: 'A production-ready fullstack platform template',
+    name: 'SAIL Starter Kit',
+    slug: 'sail-starter-kit',
+    description: 'AI-Enabled App Generation Platform',
     type: 'saas-dashboard',
   },
   theme: {
-    primaryColor: 'indigo',
+    primaryColor: 'sky',
   },
 };
 

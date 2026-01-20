@@ -1,4 +1,4 @@
-# Core Platform Docker Compose
+# SAIL Starter Kit Docker Compose
 #
 # Usage:
 #   docker compose up -d          # Start all services
