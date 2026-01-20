@@ -24,16 +24,11 @@ export const routes = {
   // Dashboard
   dashboard: () => DASHBOARD_BASE,
 
-  // DEPRECATED: IHC Hierarchy Explorer - TO BE DELETED by 2025-01-05
-  // hierarchy: () => `${DASHBOARD_BASE}/hierarchy`,
 
   // Groups
   groups: () => `${DASHBOARD_BASE}/groups`,
   groupDetail: (code: string) => `${DASHBOARD_BASE}/groups/${code}`,
 
-  // DEPRECATED: Entities pages - TO BE DELETED by 2025-01-05
-  // entities: () => `${DASHBOARD_BASE}/entities`,
-  // entityProfile: (code: string) => `${DASHBOARD_BASE}/entity/${code}`,
 
   // Companies
   companies: () => `${DASHBOARD_BASE}/companies`,

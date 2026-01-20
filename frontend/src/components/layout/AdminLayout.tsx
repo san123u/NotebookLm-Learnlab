@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { AdminSidebar } from './AdminSidebar';
 import { AdminHeader } from './AdminHeader';
+import { useSystemConfig } from '../../hooks/useSystemConfig';
 
 export function AdminLayout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const { config } = useSystemConfig();
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
@@ -26,8 +28,8 @@ export function AdminLayout() {
         {/* Footer */}
         <footer className="bg-white border-t border-gray-200 py-3 px-6">
           <div className="flex items-center justify-between text-xs text-gray-400">
-            <span>© {new Date().getFullYear()} International Holding Company</span>
-            <span className="text-purple-500 font-medium">XAILON Admin</span>
+            <span>© {new Date().getFullYear()} {config.app.name}</span>
+            <span className="text-[var(--btn-primary-bg)] font-medium">{config.app.name} Admin</span>
           </div>
         </footer>
       </div>

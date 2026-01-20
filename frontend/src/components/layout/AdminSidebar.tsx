@@ -17,6 +17,7 @@ import {
   Building2,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { useSystemConfig } from '../../hooks/useSystemConfig';
 
 interface AdminSidebarProps {
   collapsed?: boolean;
@@ -46,6 +47,8 @@ const adminNavigation: NavItem[] = [
 ];
 
 export function AdminSidebar({ collapsed = false, onToggle }: AdminSidebarProps) {
+  const { config } = useSystemConfig();
+
   return (
     <div
       className={cn(
@@ -61,13 +64,13 @@ export function AdminSidebar({ collapsed = false, onToggle }: AdminSidebarProps)
         {!collapsed && (
           <div className="flex items-center gap-2">
             <img
-              src="/ihc-logo.png"
-              alt="IHC Logo"
+              src="/logo-icon.svg"
+              alt={config.app.name}
               className="h-7 w-auto"
               style={{ filter: 'brightness(0) invert(1)' }}
             />
-            <span className="gitfont-bold text-white text-[36px] text-bold" style={{ fontWeight: 'boldgit' }}>
-              X<span style={{ color: "#c5a9ff" }}>AI</span>LON
+            <span className="font-bold text-white text-lg">
+              {config.app.name}
             </span>
           </div>
         )}

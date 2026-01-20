@@ -51,13 +51,11 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             {/* Logo */}
             <div className="flex items-center justify-center gap-4 mb-8">
               <img
-                src="/ihc-logo.png"
-                alt="IHC Logo"
+                src="/logo-icon.svg"
+                alt="Logo"
                 className="h-12 w-auto"
                 style={{ filter: 'brightness(0) invert(1)' }}
               />
-              <div className="w-px h-8 bg-slate-600" />
-              <div className="text-2xl font-bold text-white tracking-wider">XAILON</div>
             </div>
 
             {/* Error Card */}
@@ -97,10 +95,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               </div>
             </div>
 
-            {/* Footer */}
-            <p className="mt-6 text-sm text-slate-500">
-              International Holding Company
-            </p>
           </div>
         </div>
       );

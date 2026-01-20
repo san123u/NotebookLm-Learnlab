@@ -54,8 +54,8 @@ export function Layout() {
         {!isChatRoute && (
           <footer className="bg-white border-t border-gray-200 py-3 px-6">
             <div className="flex items-center justify-between text-xs text-gray-400">
-              <span>© {new Date().getFullYear()} International Holding Company</span>
-              <span>XAILON - IHC Analytics Platform</span>
+              <span>© {new Date().getFullYear()} {config.app.name}</span>
+              <span>{config.app.description}</span>
             </div>
           </footer>
         )}

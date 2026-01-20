@@ -2,10 +2,10 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Shield, Zap, Users, BarChart3 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { useAppConfig } from '../hooks/useAppConfig';
+import { useSystemConfig } from '../hooks/useSystemConfig';
 
 export function LandingPage() {
-  const { config, loading } = useAppConfig();
+  const { config, loading } = useSystemConfig();
 
   if (loading) {
     return (
@@ -24,11 +24,15 @@ export function LandingPage() {
         <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-[var(--btn-primary-bg)] rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-base">
-                  {app.name.charAt(0).toUpperCase()}
-                </span>
-              </div>
+              <img
+                src="/logo-icon.svg"
+                alt={app.name}
+                className="w-9 h-9"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.outerHTML = `<div class="w-9 h-9 bg-[var(--btn-primary-bg)] rounded-lg flex items-center justify-center"><span class="text-white font-bold text-base">${app.name.charAt(0).toUpperCase()}</span></div>`;
+                }}
+              />
               <span className="text-lg font-semibold text-gray-900">{app.name}</span>
             </div>
             <div className="flex items-center gap-4">
@@ -139,11 +143,15 @@ export function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-[var(--btn-primary-bg)] rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">
-                  {app.name.charAt(0).toUpperCase()}
-                </span>
-              </div>
+              <img
+                src="/logo-icon.svg"
+                alt={app.name}
+                className="w-8 h-8"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.outerHTML = `<div class="w-8 h-8 bg-[var(--btn-primary-bg)] rounded-lg flex items-center justify-center"><span class="text-white font-bold text-sm">${app.name.charAt(0).toUpperCase()}</span></div>`;
+                }}
+              />
               <span className="text-sm font-medium text-gray-900">{app.name}</span>
             </div>
             <p className="text-sm text-gray-500">

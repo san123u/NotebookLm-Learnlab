@@ -7,6 +7,7 @@ import { AuthLayout } from './components/layout/AuthLayout';
 import { AdminLayout } from './components/layout/AdminLayout';
 import { RoleGuard } from './components/auth/RoleGuard';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { DocumentTitle } from './components/DocumentTitle';
 import { LandingPage } from './pages/LandingPage';
 import { DesignSystemGuide } from './pages/DesignSystemGuide';
 import { NotFound } from './pages/NotFound';
@@ -101,6 +102,7 @@ function App() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
+          <DocumentTitle />
           <AuthProvider>
             <BrowserRouter>
               <AppRoutes />

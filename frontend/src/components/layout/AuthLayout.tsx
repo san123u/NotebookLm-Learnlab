@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import { createContext, useContext, useState } from 'react';
 import { AnimatedBackground } from '../ui/AnimatedBackground';
+import { useSystemConfig } from '../../hooks/useSystemConfig';
 
 // Context for sharing messages across auth pages
 interface AuthLayoutContextType {
@@ -25,6 +26,7 @@ export function useAuthLayout() {
 export function AuthLayout() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const { config } = useSystemConfig();
 
   const clearMessages = () => {
     setError('');
@@ -68,7 +70,7 @@ export function AuthLayout() {
 
           {/* Copyright */}
           <p className="mt-6 text-center text-sm text-slate-500">
-            &copy; {new Date().getFullYear()} International Holding Company. All rights reserved.
+            &copy; {new Date().getFullYear()} {config.app.name}. All rights reserved.
           </p>
         </div>
       </div>
