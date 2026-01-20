@@ -13,10 +13,24 @@ AI-Enabled Fullstack Starter Kit with app generation, authentication, and multi-
 
 **If this is a fresh clone or the user asks to "start the project":**
 
+1. Ask the user for their app preferences:
+   - App name (required)
+   - Primary color (default: sky)
+   - App type (default: saas-dashboard)
+
+2. Run init with their values:
 ```bash
-./init-project.sh      # Interactive setup - configures app name, colors, .env
+./init-project.sh --name "User's App Name" --color indigo --type saas-dashboard
 docker compose up --build
 ```
+
+Available options:
+- `--name NAME` - App name (required for non-interactive)
+- `--slug SLUG` - URL-friendly slug (auto-generated from name if not provided)
+- `--color COLOR` - Tailwind color name or hex (default: sky)
+- `--type TYPE` - saas-dashboard, marketplace, internal-tool, ai-chat-app, other
+- `--desc DESC` - App description
+- `--defaults` - Skip prompts, use all defaults
 
 The init script will:
 1. Ask for app name, slug, primary color, description

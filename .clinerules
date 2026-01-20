@@ -12,10 +12,18 @@ AI-Enabled Fullstack Platform with:
 
 If this is a fresh clone or the user asks to "start the project":
 
+1. Ask the user for their app preferences:
+   - App name (required)
+   - Primary color (default: sky)
+   - App type (default: saas-dashboard)
+
+2. Run init with their values:
 ```bash
-./init-project.sh      # Interactive setup - configures app name, colors, .env
+./init-project.sh --name "User's App Name" --color indigo --type saas-dashboard
 docker compose up --build
 ```
+
+Options: --name, --slug, --color, --type, --desc, --defaults
 
 The init script will:
 1. Ask for app name, slug, primary color, description

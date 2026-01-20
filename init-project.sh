@@ -120,9 +120,78 @@ print_banner() {
     echo ""
 }
 
+# Show usage
+show_usage() {
+    echo "Usage: ./init-project.sh [OPTIONS]"
+    echo ""
+    echo "Options:"
+    echo "  --name NAME        App name (e.g., 'My App')"
+    echo "  --slug SLUG        App slug (e.g., 'my-app')"
+    echo "  --color COLOR      Primary color (e.g., 'indigo', '#3b82f6')"
+    echo "  --desc DESC        App description"
+    echo "  --type TYPE        App type: saas-dashboard, marketplace, internal-tool, ai-chat-app, other"
+    echo "  --defaults, -d     Use default values (non-interactive)"
+    echo "  --help, -h         Show this help"
+    echo ""
+    echo "Examples:"
+    echo "  ./init-project.sh                                    # Interactive mode"
+    echo "  ./init-project.sh --defaults                         # Use defaults"
+    echo "  ./init-project.sh --name 'My App' --color indigo     # Pass values directly"
+}
+
 # Main function
 main() {
     cd "$SCRIPT_DIR"
+
+    # Parse arguments
+    USE_DEFAULTS=false
+    ARG_NAME=""
+    ARG_SLUG=""
+    ARG_COLOR=""
+    ARG_DESC=""
+    ARG_TYPE=""
+
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --defaults|-d)
+                USE_DEFAULTS=true
+                shift
+                ;;
+            --name)
+                ARG_NAME="$2"
+                shift 2
+                ;;
+            --slug)
+                ARG_SLUG="$2"
+                shift 2
+                ;;
+            --color)
+                ARG_COLOR="$2"
+                shift 2
+                ;;
+            --desc)
+                ARG_DESC="$2"
+                shift 2
+                ;;
+            --type)
+                ARG_TYPE="$2"
+                shift 2
+                ;;
+            --help|-h)
+                show_usage
+                exit 0
+                ;;
+            *)
+                shift
+                ;;
+        esac
+    done
+
+    # Check if all required args provided (non-interactive mode)
+    NON_INTERACTIVE=false
+    if [[ -n "$ARG_NAME" ]]; then
+        NON_INTERACTIVE=true
+    fi
 
     # Check if already initialized (check for .env since system.config.json is in repo)
     if [[ -f ".env" ]]; then
@@ -132,86 +201,111 @@ main() {
 
     print_banner
 
-    print_header "App Information"
+    # Use defaults for non-interactive mode (AI assistants, CI/CD)
+    if [[ "$USE_DEFAULTS" == true ]]; then
+        print_step "Using default configuration (--defaults flag)"
+        APP_NAME="SAIL Starter Kit"
+        APP_SLUG="app"
+        PRIMARY_COLOR="sky"
+        APP_DESCRIPTION="AI-Enabled Fullstack Starter Kit"
+        APP_TYPE="saas-dashboard"
+    elif [[ "$NON_INTERACTIVE" == true ]]; then
+        # Use provided arguments
+        APP_NAME="$ARG_NAME"
+        APP_SLUG="${ARG_SLUG:-$(slugify "$APP_NAME")}"
+        PRIMARY_COLOR="${ARG_COLOR:-sky}"
+        APP_DESCRIPTION="${ARG_DESC:-$APP_NAME - Built with SAIL Starter Kit}"
+        APP_TYPE="${ARG_TYPE:-saas-dashboard}"
 
-    # App Name
-    while true; do
-        read -p "${BOLD}App Name (e.g., 'My Awesome App')${NC}: " APP_NAME
-        if [[ -n "$APP_NAME" ]]; then
-            break
-        fi
-        print_error "This field is required"
-    done
+        print_step "Using provided configuration"
+        echo -e "  App Name:     ${CYAN}$APP_NAME${NC}"
+        echo -e "  Slug:         ${CYAN}$APP_SLUG${NC}"
+        echo -e "  Color:        ${CYAN}$PRIMARY_COLOR${NC}"
+        echo -e "  Description:  ${CYAN}$APP_DESCRIPTION${NC}"
+        echo -e "  Type:         ${CYAN}$APP_TYPE${NC}"
+        echo ""
+    else
+        print_header "App Information"
 
-    # App Slug
-    SUGGESTED_SLUG=$(slugify "$APP_NAME")
-    while true; do
-        read -p "${BOLD}App Slug (URL-friendly, lowercase)${NC} [${DIM}${SUGGESTED_SLUG}${NC}]: " APP_SLUG
-        APP_SLUG=${APP_SLUG:-$SUGGESTED_SLUG}
+        # App Name
+        while true; do
+            read -p "${BOLD}App Name (e.g., 'My Awesome App')${NC}: " APP_NAME
+            if [[ -n "$APP_NAME" ]]; then
+                break
+            fi
+            print_error "This field is required"
+        done
 
-        if validate_slug "$APP_SLUG"; then
-            break
-        fi
-        print_error "Slug must start with a letter and contain only lowercase letters, numbers, and hyphens"
-    done
+        # App Slug
+        SUGGESTED_SLUG=$(slugify "$APP_NAME")
+        while true; do
+            read -p "${BOLD}App Slug (URL-friendly, lowercase)${NC} [${DIM}${SUGGESTED_SLUG}${NC}]: " APP_SLUG
+            APP_SLUG=${APP_SLUG:-$SUGGESTED_SLUG}
 
-    # Primary Color
-    echo ""
-    echo -e "${BOLD}Primary Color (Tailwind name or hex)${NC}"
-    echo -e "  ${DIM}Available: slate, gray, zinc, neutral, stone, red, orange, amber, yellow, lime,${NC}"
-    echo -e "  ${DIM}green, emerald, teal, cyan, sky, blue, indigo, violet, purple, fuchsia, pink, rose${NC}"
-    echo -e "  ${DIM}Or enter a hex color (e.g., #3b82f6)${NC}"
-    while true; do
-        read -p "  Color [indigo]: " PRIMARY_COLOR
-        PRIMARY_COLOR=${PRIMARY_COLOR:-indigo}
-        PRIMARY_COLOR=$(echo "$PRIMARY_COLOR" | tr '[:upper:]' '[:lower:]')
+            if validate_slug "$APP_SLUG"; then
+                break
+            fi
+            print_error "Slug must start with a letter and contain only lowercase letters, numbers, and hyphens"
+        done
 
-        if validate_color "$PRIMARY_COLOR"; then
-            break
-        fi
-        print_error "Invalid color. Use a Tailwind color name or hex code (e.g., #3b82f6)"
-    done
+        # Primary Color
+        echo ""
+        echo -e "${BOLD}Primary Color (Tailwind name or hex)${NC}"
+        echo -e "  ${DIM}Available: slate, gray, zinc, neutral, stone, red, orange, amber, yellow, lime,${NC}"
+        echo -e "  ${DIM}green, emerald, teal, cyan, sky, blue, indigo, violet, purple, fuchsia, pink, rose${NC}"
+        echo -e "  ${DIM}Or enter a hex color (e.g., #3b82f6)${NC}"
+        while true; do
+            read -p "  Color [indigo]: " PRIMARY_COLOR
+            PRIMARY_COLOR=${PRIMARY_COLOR:-indigo}
+            PRIMARY_COLOR=$(echo "$PRIMARY_COLOR" | tr '[:upper:]' '[:lower:]')
 
-    # App Description
-    DEFAULT_DESC="$APP_NAME - Built with SAIL Starter Kit"
-    read -p "${BOLD}App Description (one sentence)${NC} [${DIM}${DEFAULT_DESC}${NC}]: " APP_DESCRIPTION
-    APP_DESCRIPTION=${APP_DESCRIPTION:-$DEFAULT_DESC}
+            if validate_color "$PRIMARY_COLOR"; then
+                break
+            fi
+            print_error "Invalid color. Use a Tailwind color name or hex code (e.g., #3b82f6)"
+        done
 
-    # App Type
-    echo ""
-    echo -e "${BOLD}What type of app is this?${NC}"
-    echo -e "  ${CYAN}>${NC} 1. SaaS Dashboard"
-    echo "    2. Marketplace"
-    echo "    3. Internal Tool"
-    echo "    4. AI Chat App"
-    echo "    5. Other"
-    while true; do
-        read -p "  Enter choice [1]: " APP_TYPE_CHOICE
-        APP_TYPE_CHOICE=${APP_TYPE_CHOICE:-1}
+        # App Description
+        DEFAULT_DESC="$APP_NAME - Built with SAIL Starter Kit"
+        read -p "${BOLD}App Description (one sentence)${NC} [${DIM}${DEFAULT_DESC}${NC}]: " APP_DESCRIPTION
+        APP_DESCRIPTION=${APP_DESCRIPTION:-$DEFAULT_DESC}
 
-        case $APP_TYPE_CHOICE in
-            1) APP_TYPE="saas-dashboard"; break;;
-            2) APP_TYPE="marketplace"; break;;
-            3) APP_TYPE="internal-tool"; break;;
-            4) APP_TYPE="ai-chat-app"; break;;
-            5) APP_TYPE="other"; break;;
-            *) print_error "Please enter a number between 1 and 5";;
-        esac
-    done
+        # App Type
+        echo ""
+        echo -e "${BOLD}What type of app is this?${NC}"
+        echo -e "  ${CYAN}>${NC} 1. SaaS Dashboard"
+        echo "    2. Marketplace"
+        echo "    3. Internal Tool"
+        echo "    4. AI Chat App"
+        echo "    5. Other"
+        while true; do
+            read -p "  Enter choice [1]: " APP_TYPE_CHOICE
+            APP_TYPE_CHOICE=${APP_TYPE_CHOICE:-1}
 
-    # Confirmation
-    print_header "Configuration Summary"
-    echo -e "  App Name:     ${CYAN}$APP_NAME${NC}"
-    echo -e "  Slug:         ${CYAN}$APP_SLUG${NC}"
-    echo -e "  Color:        ${CYAN}$PRIMARY_COLOR${NC}"
-    echo -e "  Description:  ${CYAN}$APP_DESCRIPTION${NC}"
-    echo -e "  Type:         ${CYAN}$APP_TYPE${NC}"
+            case $APP_TYPE_CHOICE in
+                1) APP_TYPE="saas-dashboard"; break;;
+                2) APP_TYPE="marketplace"; break;;
+                3) APP_TYPE="internal-tool"; break;;
+                4) APP_TYPE="ai-chat-app"; break;;
+                5) APP_TYPE="other"; break;;
+                *) print_error "Please enter a number between 1 and 5";;
+            esac
+        done
 
-    read -p "
+        # Confirmation
+        print_header "Configuration Summary"
+        echo -e "  App Name:     ${CYAN}$APP_NAME${NC}"
+        echo -e "  Slug:         ${CYAN}$APP_SLUG${NC}"
+        echo -e "  Color:        ${CYAN}$PRIMARY_COLOR${NC}"
+        echo -e "  Description:  ${CYAN}$APP_DESCRIPTION${NC}"
+        echo -e "  Type:         ${CYAN}$APP_TYPE${NC}"
+
+        read -p "
 ${BOLD}Proceed with initialization?${NC} [Y/n]: " CONFIRM
-    if [[ "$CONFIRM" == "n" || "$CONFIRM" == "N" ]]; then
-        echo "Aborted."
-        exit 0
+        if [[ "$CONFIRM" == "n" || "$CONFIRM" == "N" ]]; then
+            echo "Aborted."
+            exit 0
+        fi
     fi
 
     print_header "Initializing Project"
