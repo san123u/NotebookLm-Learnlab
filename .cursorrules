@@ -55,3 +55,15 @@ Layout Components:
 Verification:
 - Run ./verify-project.sh to check project configuration and compliance.
 - Fix any warnings or errors before deployment.
+
+App Generation Rules:
+- Use ./generate-app.sh to create new app modules.
+- Never manually create files in backend/app/modules/ or frontend/src/pages/generated/.
+- Generated apps must be registered in templates/generated-apps.json.
+- After generation, complete the manual integration steps:
+  1. Export router in backend/app/modules/__init__.py
+  2. Register router in backend/app/api/api.py
+  3. Add frontend routes in frontend/src/App.tsx
+- Generated app templates are in templates/backend/_base/ and templates/frontend/_base/.
+- Template types: saas-dashboard, marketplace, ocr-engine, analytics-platform, legal-ai, fraud-detector, automation-suite, ai-assistant.
+- Frontend Zod schemas mirror backend Pydantic schemas (generated in modules/<slug>/schema.ts).

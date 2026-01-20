@@ -210,6 +210,55 @@ Copy `.env.example` to `.env` and configure:
 
 See `ai-guidelines.md` for detailed development guidelines.
 
+## App Generation
+
+Generate new application modules from templates:
+
+```bash
+./generate-app.sh
+```
+
+### Available Templates
+
+| Template | Description |
+|----------|-------------|
+| `saas-dashboard` | Multi-tenant SaaS with dashboard and analytics |
+| `marketplace` | E-commerce with listings and transactions |
+| `ocr-engine` | Document processing and text extraction |
+| `analytics-platform` | Charts, reports, and dashboards |
+| `legal-ai` | Contract analysis and compliance |
+| `fraud-detector` | Risk scoring and alert management |
+| `automation-suite` | Workflow automation with triggers |
+| `ai-assistant` | Conversational AI with chat interface |
+
+### Generated Structure
+
+For an app named "Invoice Manager":
+
+```
+backend/app/modules/invoice_manager/
+├── __init__.py, router.py, schemas.py, service.py, README.md
+
+backend/app/odm/generated/invoice_manager.py
+
+frontend/src/pages/generated/invoice-manager/index.tsx
+frontend/src/pages/landing/invoice-manager.tsx
+frontend/src/modules/invoice-manager/types.ts
+frontend/src/modules/invoice-manager/schema.ts
+```
+
+### Post-Generation
+
+After running the generator, complete these steps:
+
+1. Export router in `backend/app/modules/__init__.py`
+2. Register router in `backend/app/api/api.py`
+3. Add routes in `frontend/src/App.tsx`
+
+Generated apps automatically appear in the sidebar navigation.
+
+See `ai-guidelines.md` for detailed app generation documentation.
+
 ## Design System
 
 The project includes a design system for UI consistency:
@@ -293,6 +342,9 @@ The script checks:
 - Design system compliance (no raw HTML form elements)
 - Required guardrail files exist
 - YAML validity
+- Template registry and generated apps
+- Generated app file completeness
+- Router registration status
 
 Fix any warnings or errors before deployment.
 

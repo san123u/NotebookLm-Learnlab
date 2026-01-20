@@ -156,6 +156,130 @@ if [[ -f "docker-compose.yml" ]]; then
 fi
 
 # ============================================
+# App Generation System
+# ============================================
+header "App Generation System"
+
+check "Checking template registry..."
+if [[ -f "templates/registry.json" ]]; then
+    pass "templates/registry.json exists"
+
+    # Validate JSON
+    if command -v jq &> /dev/null; then
+        if jq . templates/registry.json > /dev/null 2>&1; then
+            TEMPLATE_COUNT=$(jq '.templates | length' templates/registry.json)
+            echo -e "    ${DIM}$TEMPLATE_COUNT templates defined${NC}"
+        else
+            fail "templates/registry.json has invalid JSON"
+        fi
+    fi
+else
+    warn "templates/registry.json not found"
+fi
+
+check "Checking generated apps registry..."
+if [[ -f "templates/generated-apps.json" ]]; then
+    pass "templates/generated-apps.json exists"
+
+    # Count generated apps
+    if command -v jq &> /dev/null; then
+        if jq . templates/generated-apps.json > /dev/null 2>&1; then
+            APP_COUNT=$(jq '.apps | length' templates/generated-apps.json)
+            echo -e "    ${DIM}$APP_COUNT apps generated${NC}"
+        else
+            fail "templates/generated-apps.json has invalid JSON"
+        fi
+    fi
+else
+    warn "templates/generated-apps.json not found"
+fi
+
+check "Checking frontend generated-apps.json..."
+if [[ -f "frontend/public/generated-apps.json" ]]; then
+    pass "frontend/public/generated-apps.json exists"
+else
+    warn "frontend/public/generated-apps.json not found - run generate-app.sh"
+fi
+
+# Verify generated apps have all required files
+if [[ -f "templates/generated-apps.json" ]] && command -v jq &> /dev/null; then
+    APP_COUNT=$(jq '.apps | length' templates/generated-apps.json)
+
+    if [[ "$APP_COUNT" -gt 0 ]]; then
+        check "Verifying generated app files..."
+
+        APPS_VALID=0
+        APPS_INVALID=0
+
+        for i in $(seq 0 $((APP_COUNT - 1))); do
+            APP_NAME=$(jq -r ".apps[$i].name" templates/generated-apps.json)
+            APP_SLUG=$(jq -r ".apps[$i].slug" templates/generated-apps.json)
+            SLUG_SNAKE=$(echo "$APP_SLUG" | tr '-' '_')
+
+            MISSING=""
+
+            # Check backend module
+            [[ ! -d "backend/app/modules/$SLUG_SNAKE" ]] && MISSING+="backend module, "
+            [[ ! -f "backend/app/modules/$SLUG_SNAKE/router.py" ]] && MISSING+="router.py, "
+            [[ ! -f "backend/app/modules/$SLUG_SNAKE/service.py" ]] && MISSING+="service.py, "
+            [[ ! -f "backend/app/modules/$SLUG_SNAKE/schemas.py" ]] && MISSING+="schemas.py, "
+
+            # Check ODM
+            [[ ! -f "backend/app/odm/generated/$SLUG_SNAKE.py" ]] && MISSING+="odm model, "
+
+            # Check frontend
+            [[ ! -f "frontend/src/pages/generated/$APP_SLUG/index.tsx" ]] && MISSING+="frontend page, "
+            [[ ! -f "frontend/src/modules/$APP_SLUG/types.ts" ]] && MISSING+="types, "
+
+            if [[ -z "$MISSING" ]]; then
+                ((APPS_VALID++))
+            else
+                ((APPS_INVALID++))
+                MISSING="${MISSING%, }"  # Remove trailing comma
+                warn "App '$APP_NAME' missing: $MISSING"
+            fi
+        done
+
+        if [[ "$APPS_INVALID" -eq 0 ]]; then
+            pass "All $APPS_VALID generated apps have complete files"
+        else
+            warn "$APPS_INVALID of $APP_COUNT apps have missing files"
+        fi
+
+        # Check router registration
+        check "Checking router registrations..."
+
+        REGISTERED=0
+        UNREGISTERED=0
+
+        for i in $(seq 0 $((APP_COUNT - 1))); do
+            APP_SLUG=$(jq -r ".apps[$i].slug" templates/generated-apps.json)
+            SLUG_SNAKE=$(echo "$APP_SLUG" | tr '-' '_')
+
+            # Check if exported in __init__.py
+            if grep -q "${SLUG_SNAKE}_router" backend/app/modules/__init__.py 2>/dev/null; then
+                # Check if registered in api.py
+                if grep -q "${SLUG_SNAKE}_router" backend/app/api/api.py 2>/dev/null; then
+                    ((REGISTERED++))
+                else
+                    ((UNREGISTERED++))
+                    warn "Router '${SLUG_SNAKE}_router' exported but not registered in api.py"
+                fi
+            else
+                ((UNREGISTERED++))
+                warn "Router '${SLUG_SNAKE}_router' not exported in modules/__init__.py"
+            fi
+        done
+
+        if [[ "$UNREGISTERED" -eq 0 ]] && [[ "$REGISTERED" -gt 0 ]]; then
+            pass "All $REGISTERED app routers properly registered"
+        elif [[ "$REGISTERED" -eq 0 ]] && [[ "$APP_COUNT" -gt 0 ]]; then
+            warn "No app routers registered - complete manual integration steps"
+        fi
+    fi
+fi
+
+# ============================================
 # Summary
 # ============================================
 header "Summary"
