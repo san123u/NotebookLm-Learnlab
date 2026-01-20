@@ -49,6 +49,16 @@ After init, access the app at:
 - NO raw HTML elements - use design system components
 - NO hardcoded colors - use CSS variables
 - NO manual file creation in modules/ or pages/generated/
+- NO using `npm run build` or `npm run dev` to test - use Docker
+
+### Building & Testing
+ALWAYS use Docker to build and run:
+```bash
+docker compose up --build      # Build and start
+docker compose up --build -d   # Background mode
+docker compose logs -f         # View logs
+```
+After code changes, rebuild with Docker to verify.
 
 ### Required Patterns
 

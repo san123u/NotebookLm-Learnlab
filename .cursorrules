@@ -45,6 +45,12 @@ Rules:
 - Do NOT create new databases.
 - Follow existing naming conventions.
 - If unsure, ask before changing structure.
+- ALWAYS build and test via Docker (NOT npm run build).
+
+Building & Testing:
+- ALWAYS use `docker compose up --build` to build and run.
+- NEVER just run `npm run build` or `npm run dev`.
+- After code changes, rebuild with Docker to verify.
 
 Design System Rules:
 - Always use design system components from frontend/src/components/ui/.

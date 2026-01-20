@@ -47,6 +47,15 @@ After init, access the app at:
 5. Use raw HTML form elements (use design system)
 6. Hardcode color values (use CSS variables)
 7. Create files manually in modules/ or generated/
+8. Use `npm run build` or `npm run dev` to test - ALWAYS use Docker
+
+### Building & Testing
+ALWAYS use Docker:
+```bash
+docker compose up --build      # Build and start
+docker compose up --build -d   # Background mode
+```
+After code changes, rebuild with Docker to verify.
 
 ### ALWAYS DO
 1. Use design system components from `components/ui/`

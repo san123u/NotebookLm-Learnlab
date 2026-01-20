@@ -63,6 +63,20 @@ After init, access the app at:
 - Use async/await for database operations
 - Use dependency injection via FastAPI's `Depends()`
 - Run `./verify-project.sh` before deployment
+- **Build and test via Docker**: `docker compose up --build` (NOT `npm run build`)
+
+## Building & Testing (IMPORTANT)
+
+**ALWAYS use Docker to build and run the project:**
+```bash
+docker compose up --build      # Build and start
+docker compose up --build -d   # Build and start in background
+docker compose logs -f         # View logs
+```
+
+**NEVER just run `npm run build` or `npm run dev`** - always verify changes work in Docker.
+
+After making code changes, rebuild with Docker to verify everything works.
 
 ## Directory Structure
 
