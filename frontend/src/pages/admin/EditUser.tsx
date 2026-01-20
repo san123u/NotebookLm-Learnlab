@@ -18,6 +18,7 @@ import {
   getUser,
   updateUser,
 } from '../../lib/api';
+import { validatePassword } from '../../lib/validation';
 import { Button } from '../../components/ui/Button';
 import { PageLayout } from '../../components/layout/PageLayout';
 import type { UpdateUserRequest } from '../../types';
@@ -89,8 +90,9 @@ export function EditUserPage() {
     };
 
     if (password) {
-      if (password.length < 6) {
-        setError('Password must be at least 6 characters');
+      const passwordValidation = validatePassword(password);
+      if (!passwordValidation.isValid) {
+        setError(passwordValidation.errors[0]);
         return;
       }
       data.password = password;
@@ -163,9 +165,9 @@ export function EditUserPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter new password"
+                  placeholder="Min 8 characters"
                   className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  minLength={6}
+                  minLength={8}
                   autoComplete="new-password"
                 />
                 <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />

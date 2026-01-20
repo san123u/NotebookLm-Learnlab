@@ -14,6 +14,7 @@ import {
   Check,
 } from 'lucide-react';
 import { createUser } from '../../lib/api';
+import { validateEmail, validatePassword } from '../../lib/validation';
 import { Button } from '../../components/ui/Button';
 import { PageLayout } from '../../components/layout/PageLayout';
 import type { CreateUserRequest } from '../../types';
@@ -55,13 +56,17 @@ export function CreateUserPage() {
     e.preventDefault();
     setError(null);
 
-    if (!email.trim()) {
-      setError('Email is required');
+    // Validate email
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.isValid) {
+      setError(emailValidation.errors[0]);
       return;
     }
 
-    if (!password || password.length < 6) {
-      setError('Password must be at least 6 characters');
+    // Validate password
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      setError(passwordValidation.errors[0]);
       return;
     }
 
@@ -128,9 +133,9 @@ export function CreateUserPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Min 6 characters"
+                  placeholder="Min 8 characters"
                   className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  minLength={6}
+                  minLength={8}
                   required
                 />
                 <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
