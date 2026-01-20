@@ -9,6 +9,27 @@ AI-Enabled Fullstack Starter Kit with app generation, authentication, and multi-
 - Frontend: React 19 + TypeScript + Vite + TailwindCSS v4 + Zustand + React Query
 - Infrastructure: Docker Compose + Nginx + Redis
 
+## First Time Setup (IMPORTANT)
+
+**If this is a fresh clone or the user asks to "start the project":**
+
+```bash
+./init-project.sh      # Interactive setup - configures app name, colors, .env
+docker compose up --build
+```
+
+The init script will:
+1. Ask for app name, slug, primary color, description
+2. Generate `system.config.json` with your settings
+3. Create `.env` from template with secure defaults
+4. Update Docker service names
+
+**DO NOT** just copy `.env.example` and run `docker compose up` - always use `./init-project.sh` first.
+
+After init, access the app at:
+- Frontend: http://localhost:3100
+- API Docs: http://localhost:3100/api/docs
+
 ## Critical Rules
 
 ### DO NOT
