@@ -2,13 +2,14 @@ import { cn } from '../../lib/utils';
 
 export interface BadgeProps {
   children: React.ReactNode;
-  variant?: 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info';
+  variant?: 'default' | 'secondary' | 'primary' | 'success' | 'warning' | 'danger' | 'info';
   size?: 'sm' | 'md';
   className?: string;
 }
 
 const variantStyles = {
   default: 'bg-gray-100 text-gray-700',
+  secondary: 'bg-gray-200 text-gray-600',
   primary: 'bg-[var(--btn-primary-bg)]/10 text-[var(--btn-primary-bg)]',
   success: 'bg-green-100 text-green-700',
   warning: 'bg-amber-100 text-amber-700',

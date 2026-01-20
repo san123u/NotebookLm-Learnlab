@@ -49,8 +49,9 @@ export function useAppConfig(): { config: AppConfig; loading: boolean } {
         const response = await fetch('/app.config.json');
         if (response.ok) {
           const data = await response.json();
-          cachedConfig = { ...defaultConfig, ...data };
-          setConfig(cachedConfig);
+          const loadedConfig: AppConfig = { ...defaultConfig, ...data };
+          cachedConfig = loadedConfig;
+          setConfig(loadedConfig);
         }
       } catch {
         // Config file not found, use defaults

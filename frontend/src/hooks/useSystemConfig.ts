@@ -55,12 +55,13 @@ export function useSystemConfig(): { config: SystemConfig; loading: boolean } {
         const response = await fetch('/system.config.json');
         if (response.ok) {
           const data = await response.json();
-          cachedConfig = {
+          const loadedConfig: SystemConfig = {
             app: { ...defaultConfig.app, ...data.app },
             theme: { ...defaultConfig.theme, ...data.theme },
             layout: { ...defaultConfig.layout, ...data.layout },
           };
-          setConfig(cachedConfig);
+          cachedConfig = loadedConfig;
+          setConfig(loadedConfig);
         }
       } catch {
         // Config file not found, use defaults

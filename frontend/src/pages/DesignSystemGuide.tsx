@@ -23,7 +23,7 @@ import {
   Tab,
   TabPanel,
 } from '../components/ui';
-import { Copy, Check, ExternalLink } from 'lucide-react';
+import { Copy, Check } from 'lucide-react';
 
 export function DesignSystemGuide() {
   return (
