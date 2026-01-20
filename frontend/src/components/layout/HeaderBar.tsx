@@ -147,7 +147,7 @@ export function HeaderBar({ variant = 'user' }: HeaderBarProps) {
     : 'from-[var(--btn-primary-bg)] to-sky-400';
 
   return (
-    <header className="bg-white border-b border-gray-100 sticky top-0 z-10">
+    <header className="bg-white border-b border-gray-100 sticky top-0 z-10 rounded-tl-2xl">
       <div className="flex items-center justify-between h-14 px-6">
         {/* Breadcrumbs */}
         <nav className="flex items-center space-x-1 text-sm">

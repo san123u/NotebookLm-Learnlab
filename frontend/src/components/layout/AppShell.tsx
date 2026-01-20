@@ -51,7 +51,7 @@ export function AppShell({ variant = 'user' }: AppShellProps) {
   }, [sidebarCollapsed]);
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
+    <div className="flex h-screen bg-[#121212] overflow-hidden">
       {/* Sidebar */}
       <Sidebar
         collapsed={sidebarCollapsed}
@@ -60,19 +60,19 @@ export function AppShell({ variant = 'user' }: AppShellProps) {
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0 rounded-l-2xl bg-gray-50">
         {/* Header with breadcrumbs and profile */}
         <HeaderBar variant={variant} />
 
         {/* Main content area */}
-        <main className="flex-1 overflow-auto bg-gray-50">
+        <main className="flex-1 overflow-auto">
           <div className="p-6 max-w-[1600px] mx-auto w-full">
             <Outlet />
           </div>
         </main>
 
         {/* Footer */}
-        <footer className="bg-white border-t border-gray-100 py-3 px-6">
+        <footer className="bg-white border-t border-gray-100 py-3 px-6 rounded-bl-2xl">
           <div className="flex items-center justify-between text-xs text-gray-400 max-w-[1600px] mx-auto">
             <span className="flex items-center gap-1.5">
               <span>&copy; {new Date().getFullYear()}</span>

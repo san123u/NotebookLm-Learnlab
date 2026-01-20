@@ -10,6 +10,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { useSystemConfig } from '../hooks/useSystemConfig';
 import { getAdminStats } from '../lib/api';
+import { PageLayout } from '../components/layout/PageLayout';
 
 interface DashboardStats {
   totalUsers: number;
@@ -57,17 +58,10 @@ export default function Dashboard() {
   }, [isSuperAdmin]);
 
   return (
-    <div>
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">
-          Welcome{user?.first_name ? `, ${user.first_name}` : ''}!
-        </h1>
-        <p className="text-gray-500 mt-1">
-          This is your {config.app.name} dashboard. Here's what's happening today.
-        </p>
-      </div>
-
+    <PageLayout
+      title={`Welcome${user?.first_name ? `, ${user.first_name}` : ''}!`}
+      subtitle={`This is your ${config.app.name} dashboard. Here's what's happening today.`}
+    >
       {/* Stats Cards - Only show for super admin */}
       {isSuperAdmin && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -121,7 +115,7 @@ export default function Dashboard() {
           />
         )}
       </div>
-    </div>
+    </PageLayout>
   );
 }
 

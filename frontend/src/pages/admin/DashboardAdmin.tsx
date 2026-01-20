@@ -8,6 +8,7 @@ import {
   UserPlus,
 } from 'lucide-react';
 import { getAdminStats } from '../../lib/api';
+import { PageLayout } from '../../components/layout/PageLayout';
 
 interface DashboardStats {
   totalUsers: number;
@@ -48,13 +49,10 @@ export default function DashboardAdmin() {
   }, []);
 
   return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-        <p className="text-gray-500 mt-1">System overview and management</p>
-      </div>
-
+    <PageLayout
+      title="Admin Dashboard"
+      subtitle="System overview and management"
+    >
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard
@@ -104,7 +102,7 @@ export default function DashboardAdmin() {
           color="emerald"
         />
       </div>
-    </div>
+    </PageLayout>
   );
 }
 

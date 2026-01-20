@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   UserCog,
-  ArrowLeft,
   Mail,
   Lock,
   User,
@@ -20,6 +19,7 @@ import {
   updateUser,
 } from '../../lib/api';
 import { Button } from '../../components/ui/Button';
+import { PageLayout } from '../../components/layout/PageLayout';
 import type { UpdateUserRequest } from '../../types';
 
 export function EditUserPage() {
@@ -117,26 +117,13 @@ export function EditUserPage() {
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
-        <button
-          onClick={() => navigate('/admin/users')}
-          className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5 text-gray-600" />
-        </button>
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-sky-100 rounded-xl flex items-center justify-center">
-            <UserCog className="w-6 h-6 text-sky-600" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Edit User</h1>
-            <p className="text-gray-500">{user.email}</p>
-          </div>
-        </div>
-      </div>
-
+    <PageLayout
+      title="Edit User"
+      subtitle={user.email}
+      icon={<UserCog className="w-6 h-6 text-sky-600" />}
+      backTo="/admin/users"
+      maxWidth="4xl"
+    >
       {/* Error Alert */}
       {error && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
@@ -306,7 +293,7 @@ export function EditUserPage() {
           </Button>
         </div>
       </form>
-    </div>
+    </PageLayout>
   );
 }
 

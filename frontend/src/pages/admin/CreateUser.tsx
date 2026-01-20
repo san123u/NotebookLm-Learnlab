@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   UserPlus,
-  ArrowLeft,
   Mail,
   Lock,
   User,
@@ -16,6 +15,7 @@ import {
 } from 'lucide-react';
 import { createUser } from '../../lib/api';
 import { Button } from '../../components/ui/Button';
+import { PageLayout } from '../../components/layout/PageLayout';
 import type { CreateUserRequest } from '../../types';
 
 export function CreateUserPage() {
@@ -80,26 +80,13 @@ export function CreateUserPage() {
   };
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
-        <button
-          onClick={() => navigate('/admin/users')}
-          className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5 text-gray-600" />
-        </button>
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-sky-100 rounded-xl flex items-center justify-center">
-            <UserPlus className="w-6 h-6 text-sky-600" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Create User</h1>
-            <p className="text-gray-500">Add a new user to the system</p>
-          </div>
-        </div>
-      </div>
-
+    <PageLayout
+      title="Create User"
+      subtitle="Add a new user to the system"
+      icon={<UserPlus className="w-6 h-6 text-sky-600" />}
+      backTo="/admin/users"
+      maxWidth="2xl"
+    >
       {/* Error Alert */}
       {error && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
@@ -264,7 +251,7 @@ export function CreateUserPage() {
           </Button>
         </div>
       </form>
-    </div>
+    </PageLayout>
   );
 }
 

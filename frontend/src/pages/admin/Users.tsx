@@ -22,6 +22,7 @@ import {
 import { cn } from '../../lib/utils';
 import { useAuth } from '../../contexts/AuthContext';
 import { LinkButton } from '../../components/ui/Button';
+import { PageLayout } from '../../components/layout/PageLayout';
 import type { User } from '../../types';
 
 const ITEMS_PER_PAGE = 20;
@@ -105,18 +106,11 @@ export function UsersPage() {
   }, [actionMenuOpen]);
 
   return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-sky-100 rounded-xl flex items-center justify-center">
-            <UsersIcon className="w-6 h-6 text-sky-600" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
-            <p className="text-gray-500">Manage users and their permissions</p>
-          </div>
-        </div>
+    <PageLayout
+      title="User Management"
+      subtitle="Manage users and their permissions"
+      icon={<UsersIcon className="w-6 h-6 text-sky-600" />}
+      actions={
         <LinkButton
           to="/admin/users/create"
           variant="primary"
@@ -124,8 +118,8 @@ export function UsersPage() {
         >
           Create User
         </LinkButton>
-      </div>
-
+      }
+    >
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-white rounded-xl border border-gray-200 p-4">
@@ -284,7 +278,7 @@ export function UsersPage() {
           </>
         )}
       </div>
-    </div>
+    </PageLayout>
   );
 }
 

@@ -37,13 +37,13 @@ const adminNavigation: NavItem[] = [
 // Accent colors for each variant
 const variantStyles = {
   user: {
-    activeBg: 'bg-sky-900',
-    activeText: 'text-sky-200',
+    activeIcon: 'text-sky-400',
+    activeBg: 'bg-gray-700/50',
     labelColor: 'text-sky-400',
   },
   admin: {
-    activeBg: 'bg-purple-900',
-    activeText: 'text-purple-200',
+    activeIcon: 'text-purple-400',
+    activeBg: 'bg-gray-700/50',
     labelColor: 'text-purple-400',
   },
 };
@@ -57,16 +57,17 @@ export function Sidebar({ collapsed = false, onToggle, variant = 'user' }: Sideb
   return (
     <div
       className={cn(
-        'flex flex-col bg-black h-full flex-shrink-0 transition-all duration-200',
+        'flex flex-col h-full flex-shrink-0 transition-all duration-200',
+        'bg-[#1c1c1c]',
         collapsed ? 'w-16' : 'w-64'
       )}
     >
       {/* Logo & Toggle */}
       <div className={cn(
-        'flex items-center h-16 border-b border-gray-800 flex-shrink-0',
+        'flex items-center h-16 flex-shrink-0',
         collapsed ? 'justify-center px-2' : 'justify-between px-4'
       )}>
-        {!collapsed && (
+        {!collapsed ? (
           <div className="flex items-center gap-2">
             <img
               src="/logo-icon.svg"
@@ -78,23 +79,28 @@ export function Sidebar({ collapsed = false, onToggle, variant = 'user' }: Sideb
               {config.app.name}
             </span>
           </div>
+        ) : (
+          <img
+            src="/logo-icon.svg"
+            alt={config.app.name}
+            className="h-7 w-auto"
+            style={{ filter: 'brightness(0) invert(1)' }}
+          />
         )}
-        <button
-          onClick={onToggle}
-          className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
-          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        >
-          {collapsed ? (
-            <PanelLeft className="w-5 h-5" />
-          ) : (
+        {!collapsed && (
+          <button
+            onClick={onToggle}
+            className="p-2 rounded-xl text-gray-500 hover:text-white hover:bg-gray-700/50 transition-colors"
+            title="Collapse sidebar"
+          >
             <PanelLeftClose className="w-5 h-5" />
-          )}
-        </button>
+          </button>
+        )}
       </div>
 
       {/* Admin Label (only for admin variant) */}
       {isAdmin && !collapsed && (
-        <div className="px-4 py-3 border-b border-gray-800">
+        <div className="px-4 py-2">
           <span className={cn('text-xs font-semibold uppercase tracking-wider flex items-center gap-2', styles.labelColor)}>
             <ShieldCheck className="w-3 h-3" />
             Admin
@@ -102,11 +108,14 @@ export function Sidebar({ collapsed = false, onToggle, variant = 'user' }: Sideb
         </div>
       )}
       {isAdmin && collapsed && (
-        <div className="flex justify-center py-3 border-b border-gray-800">
-          <ShieldCheck className={cn('w-4 h-4', styles.labelColor)} />
+        <div className="flex justify-center py-2">
+          <div className={cn('p-2 rounded-xl', styles.activeBg)}>
+            <ShieldCheck className={cn('w-5 h-5', styles.labelColor)} />
+          </div>
         </div>
       )}
 
+      {/* Navigation */}
       <nav className={cn('flex-1 py-4 space-y-1 overflow-y-auto', collapsed ? 'px-2' : 'px-3')}>
         {navigation.map((item) => (
           <NavLink
@@ -116,19 +125,40 @@ export function Sidebar({ collapsed = false, onToggle, variant = 'user' }: Sideb
             title={collapsed ? item.name : undefined}
             className={({ isActive }) =>
               cn(
-                'flex items-center py-2 text-sm font-medium rounded-lg transition-colors',
-                collapsed ? 'justify-center px-2' : 'px-3',
+                'flex items-center text-sm font-medium rounded-xl transition-all duration-150',
+                collapsed ? 'justify-center p-3' : 'px-3 py-2.5',
                 isActive
-                  ? `${styles.activeBg} ${styles.activeText}`
-                  : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                  ? `${styles.activeBg} text-white`
+                  : 'text-gray-400 hover:bg-gray-700/30 hover:text-white'
               )
             }
           >
-            <item.icon className={cn('w-5 h-5', !collapsed && 'mr-3')} />
-            {!collapsed && item.name}
+            {({ isActive }) => (
+              <>
+                <item.icon className={cn(
+                  'w-5 h-5 transition-colors',
+                  !collapsed && 'mr-3',
+                  isActive ? styles.activeIcon : ''
+                )} />
+                {!collapsed && item.name}
+              </>
+            )}
           </NavLink>
         ))}
       </nav>
+
+      {/* Toggle button at bottom when collapsed */}
+      {collapsed && (
+        <div className="p-2 pb-4">
+          <button
+            onClick={onToggle}
+            className="w-full p-3 rounded-xl text-gray-500 hover:text-white hover:bg-gray-700/50 transition-colors flex justify-center"
+            title="Expand sidebar"
+          >
+            <PanelLeft className="w-5 h-5" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

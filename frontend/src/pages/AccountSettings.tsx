@@ -23,6 +23,7 @@ import {
 } from '../lib/api';
 import { validatePassword } from '../lib/validation';
 import { Button } from '../components/ui/Button';
+import { PageLayout } from '../components/layout/PageLayout';
 
 type TabType = 'profile' | 'security';
 
@@ -42,12 +43,10 @@ export function AccountSettings() {
   const [activeTab, setActiveTab] = useState<TabType>('profile');
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Account Settings</h1>
-        <p className="text-gray-500 mt-1">Manage your profile and security settings</p>
-      </div>
-
+    <PageLayout
+      title="Account Settings"
+      subtitle="Manage your profile and security settings"
+    >
       {/* Tabs */}
       <div className="border-b border-gray-200">
         <nav className="-mb-px flex space-x-8">
@@ -75,11 +74,11 @@ export function AccountSettings() {
       </div>
 
       {/* Tab Content */}
-      <div>
+      <div className="mt-6">
         {activeTab === 'profile' && <ProfileTab />}
         {activeTab === 'security' && <SecurityTab />}
       </div>
-    </div>
+    </PageLayout>
   );
 }
 
