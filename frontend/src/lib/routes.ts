@@ -8,6 +8,7 @@
 const DASHBOARD_BASE = '/dashboard';
 const AUTH_BASE = '/auth';
 const ADMIN_BASE = '/admin';
+const NOTEBOOK_BASE = '/dashboard/notebook';
 
 // Route generators for dashboard routes
 export const routes = {
@@ -29,12 +30,16 @@ export const routes = {
   // Account
   account: () => `${DASHBOARD_BASE}/account`,
 
+  // Notebook
+  notebook: () => NOTEBOOK_BASE,
+
   // Admin
   admin: {
     dashboard: () => ADMIN_BASE,
     users: () => `${ADMIN_BASE}/users`,
     createUser: () => `${ADMIN_BASE}/users/create`,
     editUser: (userId: string) => `${ADMIN_BASE}/users/${userId}`,
+    aiSettings: () => `${ADMIN_BASE}/ai-settings`,
   },
 } as const;
 

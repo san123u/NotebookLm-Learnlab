@@ -19,6 +19,13 @@ from app.odm.course import CourseDocument
 from app.odm.learning_module import LearningModuleDocument
 from app.odm.progress import ModuleProgressDocument
 from app.odm.assignment_submission import AssignmentSubmissionDocument
+from app.odm.notebook import (
+    NotebookSourceDocument,
+    ChatMessageModel,
+    NotebookChatDocument,
+    NotebookSettingsDocument,
+    NotebookNoteDocument,
+)
 
 
 def init_document_classes(db):
@@ -32,6 +39,11 @@ def init_document_classes(db):
     LearningModuleDocument.set_db(db)
     ModuleProgressDocument.set_db(db)
     AssignmentSubmissionDocument.set_db(db)
+    NotebookSourceDocument.set_db(db)
+    ChatMessageModel.set_db(db)
+    NotebookChatDocument.set_db(db)
+    NotebookSettingsDocument.set_db(db)
+    NotebookNoteDocument.set_db(db)
 
 # Mount static files
 from fastapi.staticfiles import StaticFiles
@@ -39,6 +51,7 @@ import os
 
 # Ensure static directory exists
 os.makedirs("app/static/uploads", exist_ok=True)
+os.makedirs("app/static/notebooks", exist_ok=True)
 
 
 

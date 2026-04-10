@@ -9,6 +9,8 @@ import {
   Package,
   Layers,
   BarChart3,
+  BookOpen,
+  BrainCircuit,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useSystemConfig } from '../../hooks/useSystemConfig';
@@ -31,6 +33,7 @@ const userNavigation: NavItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, end: true },
   { name: 'Modules', href: '/dashboard/modules', icon: Package },
   { name: 'Certifications', href: '/dashboard/certifications', icon: ShieldCheck },
+  { name: 'Notebook', href: '/dashboard/notebook', icon: BookOpen },
   { name: 'Account', href: '/dashboard/account', icon: Settings },
 ];
 
@@ -40,6 +43,7 @@ const adminNavigation: NavItem[] = [
   { name: 'Module Builder', href: '/admin/module-builder', icon: Layers },
   { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
   { name: 'User Management', href: '/admin/users', icon: Users },
+  { name: 'AI Settings', href: '/admin/ai-settings', icon: BrainCircuit },
 ];
 
 // Accent colors for each variant

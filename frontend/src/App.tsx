@@ -29,6 +29,8 @@ import Dashboard from './pages/Dashboard';
 import AccountSettings from './pages/AccountSettings';
 import { ModuleBuilderPage } from './pages/admin/ModuleBuilder';
 import { AnalyticsPage } from './pages/admin/Analytics';
+import NotebookPage from './pages/notebook/NotebookPage';
+import AdminNotebookSettings from './pages/admin/NotebookSettings';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -79,6 +81,7 @@ function AppRoutes() {
         <Route path="/dashboard/modules/:courseId" element={<CoursePlayer />} />
         <Route path="/dashboard/certifications" element={<CertificationsPage />} />
         <Route path="/dashboard/account" element={<AccountSettings />} />
+        <Route path="/dashboard/notebook" element={<NotebookPage />} />
       </Route>
 
       {/* Admin routes with AppShell (admin variant) - super_admin only */}
@@ -98,6 +101,7 @@ function AppRoutes() {
         <Route path="/admin/users" element={<UsersPage />} />
         <Route path="/admin/users/create" element={<CreateUserPage />} />
         <Route path="/admin/users/:userId" element={<EditUserPage />} />
+        <Route path="/admin/ai-settings" element={<AdminNotebookSettings />} />
       </Route>
 
       {/* 404 Not Found - Catch all unmatched routes */}

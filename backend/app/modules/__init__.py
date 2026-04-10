@@ -9,6 +9,7 @@ from app.modules.auth.router import router as auth_router
 from app.modules.admin.router import router as admin_router
 from app.modules.account.router import router as account_router
 from app.modules.quiz.router import router as quiz_router
+from app.modules.notebook.router import router as notebook_router
 
 __all__ = [
     "health_router",
@@ -17,4 +18,5 @@ __all__ = [
     "admin_router",
     "account_router",
     "quiz_router",
+    "notebook_router",
 ]

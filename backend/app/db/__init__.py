@@ -68,6 +68,16 @@ async def create_indexes():
     await safe_create_index(mongo.db.audit_log, "action")
     await safe_create_index(mongo.db.audit_log, [("created_at", -1)])
 
+    # Notebook indexes
+    await safe_create_index(mongo.db.notebook_sources, "user_id")
+    await safe_create_index(mongo.db.notebook_sources, [("created_at", -1)])
+    await safe_create_index(mongo.db.notebook_chats, "user_id")
+    await safe_create_index(mongo.db.notebook_chats, [("updated_at", -1)])
+    await safe_create_index(mongo.db.notebook_messages, "chat_id")
+    await safe_create_index(mongo.db.notebook_messages, [("created_at", 1)])
+    await safe_create_index(mongo.db.notebook_settings, "user_id", unique=True)
+    await safe_create_index(mongo.db.notebook_notes, "user_id")
+
     logger.info("MongoDB indexes created")
 
 

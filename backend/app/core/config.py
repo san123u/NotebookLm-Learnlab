@@ -80,6 +80,16 @@ class Settings(BaseSettings):
     # Resend settings (when EMAIL_PROVIDER=resend)
     RESEND_API_KEY: str = ""
 
+    # ==========================================================================
+    # AI & Voice Services
+    # ==========================================================================
+    WHISPER_API_BASE: str = ""
+    WHISPER_API_KEY: str = ""
+    ELEVENLABS_API_KEY: str = ""
+    PODCAST_API_BASE: str = ""
+    PODCAST_API_KEY: str = ""
+    GOOGLE_API_KEY: str = ""
+
 
     @property
     def cors_origins_list(self) -> list[str]:

@@ -15,6 +15,7 @@ from app.modules import (
     admin_router,
     account_router,
     quiz_router,
+    notebook_router,
 )
 from app.modules.marketplace.router import router as marketplace_router
 from app.modules.learning.router import router as learning_router
@@ -76,5 +77,13 @@ api_router.include_router(
     learning_router,
     prefix="/learning",
     tags=["learning"],
+    dependencies=auth_required
+)
+
+# Notebook - NotebookLM-style AI document system
+api_router.include_router(
+    notebook_router,
+    prefix="/notebook",
+    tags=["notebook"],
     dependencies=auth_required
 )
